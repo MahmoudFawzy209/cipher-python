@@ -714,6 +714,207 @@ body.dark-theme footer {
     padding-top: 20px;
 }
 
+/* Admin Mode Controls (Hidden for normal visitors, visible only when body.admin-mode is active) */
+.hidden {
+    display: none !important;
+}
+
+.admin-lock-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    opacity: 0.35;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-right: 6px;
+    transition: var(--transition);
+}
+
+.admin-lock-btn:hover,
+body.admin-mode .admin-lock-btn {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+.admin-only-btn,
+.admin-infographic-bar {
+    display: none;
+}
+
+body.admin-mode .admin-only-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+body.admin-mode .admin-only-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+body.admin-mode .admin-save-btn {
+    background-color: #10b981;
+}
+
+body.admin-mode .admin-save-btn:hover {
+    background-color: #059669;
+}
+
+.admin-code-textarea {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    background-color: transparent;
+    color: #f8fafc;
+    border: 1px dashed var(--primary-color);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    direction: ltr;
+    text-align: left;
+    resize: none;
+    outline: none;
+}
+
+body.admin-mode .admin-infographic-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.admin-bar-btn {
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.admin-bar-btn.prompt-btn {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+}
+
+.admin-bar-btn.prompt-btn:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.admin-bar-btn.upload-btn {
+    background-color: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+}
+
+.admin-bar-btn.upload-btn:hover {
+    background-color: #059669;
+}
+
+.admin-modal-box {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    width: 92%;
+    max-width: 520px;
+    border-radius: 12px;
+    padding: 22px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-status-toggle {
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.admin-switch-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-switch-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+
+.admin-token-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.admin-token-group label {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.admin-token-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Fira Code', monospace;
+    direction: ltr;
+    text-align: left;
+}
+
+.admin-token-group small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.admin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Animations */
 .fade-in {
     animation: fadeIn 1s ease both;

@@ -168,6 +168,12 @@
                                 <i class="fa-brands fa-python"></i> <span id="modal-filename">main.py</span>
                             </div>
                             <div class="editor-actions">
+                                <button id="admin-edit-code-btn" class="admin-only-btn" title="تعديل الكود بيدك">
+                                    <i class="fa-solid fa-pen-to-square"></i> تعديل الكود
+                                </button>
+                                <button id="admin-save-code-btn" class="admin-only-btn admin-save-btn hidden" title="حفظ الكود">
+                                    <i class="fa-solid fa-floppy-disk"></i> حفظ الكود
+                                </button>
                                 <button id="copy-code-btn" class="icon-btn" title="نسخ الكود">
                                     <i class="fa-regular fa-copy"></i>
                                 </button>
@@ -177,13 +183,51 @@
                             </div>
                         </div>
                         <div class="editor-body scrollable">
-                            <pre><code id="modal-code" class="language-python"></code></pre>
+                            <pre id="modal-pre"><code id="modal-code" class="language-python"></code></pre>
+                            <textarea id="admin-code-textarea" class="admin-code-textarea hidden" spellcheck="false" placeholder="# اكتب كود بايثون هنا..."></textarea>
                         </div>
+                    </div>
+
+                    <!-- أزرار الأدمن الخاصة بالإنفوجراف (تظهر للأدمن فقط دون المساس بهيكلة الموقع) -->
+                    <div id="admin-infographic-bar" class="admin-infographic-bar">
+                        <button id="admin-copy-prompt-btn" type="button" class="admin-bar-btn prompt-btn" title="نسخ برومبت جاهز لإرساله إلى ChatGPT لتوليد إنفوجراف هذه الحلقة">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> نسخ برومبت ChatGPT
+                        </button>
+                        <button id="admin-upload-infographic-btn" type="button" class="admin-bar-btn upload-btn" title="رفع صورة الإنفوجراف من جهازك لهذه الحلقة">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع صورة الإنفوجراف (Upload)
+                        </button>
+                        <input type="file" id="admin-infographic-file-input" accept="image/*" class="hidden">
                     </div>
 
                     <button id="download-infographic-btn" class="infographic-download-btn" title="تحميل ورقة إنفوجراف تلخيص الحلقة">
                         <i class="fa-solid fa-file-arrow-down"></i> تحميل إنفوجراف تلخيص الحلقة
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إعدادات وضع الأدمن (تفتح من أيقونة القفل في التذييل) -->
+    <div id="admin-settings-modal" class="modal">
+        <div class="admin-modal-box">
+            <div class="admin-modal-header">
+                <h3><i class="fa-solid fa-user-shield"></i> إعدادات وضع الأدمن (المشرف)</h3>
+                <button id="close-admin-modal" class="icon-btn" type="button">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="admin-status-toggle">
+                    <label class="admin-switch-label">
+                        <input type="checkbox" id="admin-mode-checkbox">
+                        <span>تفعيل وضع الأدمن (تعديل الأكواد ورفع الإنفوجراف داخل الموقع)</span>
+                    </label>
+                </div>
+                <div class="admin-token-group">
+                    <label for="github-token-input">مفتاح GitHub Token (اختياري - للحفظ المباشر على كلودفلير وGitHub):</label>
+                    <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    <small>إذا كنت تعمل على الموقع المنشور على Cloudflare، ضع مفتاح GitHub Personal Access Token ليتم رفع تعديلات الكود وصور الإنفوجراف تلقائياً للمستودع ليرى جميع الزوار التحديث فوراً.</small>
+                </div>
+                <div class="admin-modal-actions">
+                    <button id="save-admin-settings-btn" type="button" class="btn btn-primary">حفظ وتطبيق</button>
                 </div>
             </div>
         </div>
@@ -202,7 +246,7 @@
             </div>
         </div>
         <div class="copyright">
-            <p>&copy; 2026 جميع الحقوق محفوظة لقناة شيفرة.</p>
+            <p>&copy; 2026 جميع الحقوق محفوظة لقناة شيفرة. <button id="admin-lock-btn" class="admin-lock-btn" title="وضع المشرف"><i class="fa-solid fa-lock"></i></button></p>
         </div>
     </footer>
 

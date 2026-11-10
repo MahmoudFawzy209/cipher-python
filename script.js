@@ -610,10 +610,56 @@ const modalTitle = document.getElementById('modal-title');
 const modalDesc = document.getElementById('modal-desc');
 const modalIframe = document.getElementById('modal-iframe');
 const modalFilename = document.getElementById('modal-filename');
+const modalPre = document.getElementById('modal-pre');
 const modalCode = document.getElementById('modal-code');
 const copyBtn = document.getElementById('copy-code-btn');
 const downloadBtn = document.getElementById('download-code-btn');
 const downloadInfographicBtn = document.getElementById('download-infographic-btn');
+
+// Admin Elements
+const adminLockBtn = document.getElementById('admin-lock-btn');
+const adminSettingsModal = document.getElementById('admin-settings-modal');
+const closeAdminModalBtn = document.getElementById('close-admin-modal');
+const adminModeCheckbox = document.getElementById('admin-mode-checkbox');
+const githubTokenInput = document.getElementById('github-token-input');
+const saveAdminSettingsBtn = document.getElementById('save-admin-settings-btn');
+const adminEditCodeBtn = document.getElementById('admin-edit-code-btn');
+const adminSaveCodeBtn = document.getElementById('admin-save-code-btn');
+const adminCodeTextarea = document.getElementById('admin-code-textarea');
+const adminCopyPromptBtn = document.getElementById('admin-copy-prompt-btn');
+const adminUploadInfographicBtn = document.getElementById('admin-upload-infographic-btn');
+const adminInfographicFileInput = document.getElementById('admin-infographic-file-input');
+
+const GITHUB_REPO = 'MahmoudFawzy209/cipher-python';
+let codeOverrides = {};
+
+// Load overrides from localStorage and lessons_overrides.json
+async function loadLessonOverrides() {
+    try {
+        const localSaved = localStorage.getItem('cipher_code_overrides');
+        if (localSaved) {
+            codeOverrides = JSON.parse(localSaved);
+        }
+    } catch (e) {
+        codeOverrides = {};
+    }
+
+    try {
+        const res = await fetch('lessons_overrides.json?t=' + Date.now());
+        if (res.ok) {
+            const remoteOverrides = await res.json();
+            codeOverrides = { ...remoteOverrides, ...codeOverrides };
+        }
+    } catch (e) {
+        // Ignore fetch errors when offline
+    }
+
+    lessons.forEach(lesson => {
+        if (codeOverrides[lesson.id] && codeOverrides[lesson.id].code) {
+            lesson.code = codeOverrides[lesson.id].code;
+        }
+    });
+}
 
 // Theme Toggle
 themeToggleBtn.addEventListener('click', () => {
@@ -632,8 +678,8 @@ themeToggleBtn.addEventListener('click', () => {
     }
 });
 
-// Load saved theme
-document.addEventListener('DOMContentLoaded', () => {
+// Load saved theme & admin state
+document.addEventListener('DOMContentLoaded', async () => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const icon = themeToggleBtn.querySelector('i');
     if (savedTheme === 'light') {
@@ -644,7 +690,13 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.className = 'fa-solid fa-sun';
     }
 
-    renderLessons(lessons); // Render all lessons on load
+    const isAdmin = localStorage.getItem('cipher_admin_mode') === 'true';
+    if (isAdmin) {
+        body.classList.add('admin-mode');
+    }
+
+    await loadLessonOverrides();
+    renderLessons(lessons); // Render lessons on load
 });
 
 // Render Lessons function
@@ -717,6 +769,15 @@ let currentLessonFilename = '';
 let currentLessonInfographic = '';
 let currentLessonId = 1;
 
+function resetEditorMode() {
+    if (modalPre && adminCodeTextarea && adminEditCodeBtn && adminSaveCodeBtn) {
+        modalPre.classList.remove('hidden');
+        adminCodeTextarea.classList.add('hidden');
+        adminEditCodeBtn.classList.remove('hidden');
+        adminSaveCodeBtn.classList.add('hidden');
+    }
+}
+
 function openModal(lesson) {
     modalTitle.textContent = lesson.title;
     modalDesc.textContent = lesson.description;
@@ -729,7 +790,11 @@ function openModal(lesson) {
     currentLessonInfographic = lesson.infographic || `infographics/${lesson.id}.png`;
     currentLessonId = lesson.id;
 
+    resetEditorMode();
     modalCode.textContent = currentLessonCode;
+    if (adminCodeTextarea) {
+        adminCodeTextarea.value = currentLessonCode;
+    }
     // Trigger PrismJS syntax highlighting
     if (window.Prism) {
         Prism.highlightElement(modalCode);
@@ -741,6 +806,7 @@ function openModal(lesson) {
 
 // Close Modal
 function closeLessonModal() {
+    resetEditorMode();
     modal.classList.remove('show');
     modalIframe.src = ''; // Stop video when closed
     document.body.style.overflow = 'auto'; // Restore background scroll
@@ -782,13 +848,260 @@ downloadBtn.addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
+// Helper: Push file to GitHub repository via GitHub REST API
+async function pushFileToGitHub(filePath, base64Content, commitMessage) {
+    const token = (localStorage.getItem('cipher_github_token') || '').trim();
+    if (!token) return false;
+
+    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`;
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+    };
+
+    let sha = null;
+    try {
+        const getRes = await fetch(apiUrl, { headers });
+        if (getRes.ok) {
+            const existing = await getRes.json();
+            sha = existing.sha;
+        }
+    } catch (e) {
+        // File might not exist yet
+    }
+
+    const bodyData = {
+        message: commitMessage,
+        content: base64Content
+    };
+    if (sha) bodyData.sha = sha;
+
+    const putRes = await fetch(apiUrl, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(bodyData)
+    });
+
+    return putRes.ok;
+}
+
+// Helper: Encode UTF-8 string to Base64
+function utf8ToBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary);
+}
+
+// Admin Settings Modal Handlers
+if (adminLockBtn && adminSettingsModal) {
+    adminLockBtn.addEventListener('click', () => {
+        adminModeCheckbox.checked = body.classList.contains('admin-mode');
+        githubTokenInput.value = localStorage.getItem('cipher_github_token') || '';
+        adminSettingsModal.classList.add('show');
+    });
+
+    closeAdminModalBtn.addEventListener('click', () => {
+        adminSettingsModal.classList.remove('show');
+    });
+
+    adminSettingsModal.addEventListener('click', (e) => {
+        if (e.target === adminSettingsModal) {
+            adminSettingsModal.classList.remove('show');
+        }
+    });
+
+    saveAdminSettingsBtn.addEventListener('click', () => {
+        const enabled = adminModeCheckbox.checked;
+        localStorage.setItem('cipher_admin_mode', enabled ? 'true' : 'false');
+        localStorage.setItem('cipher_github_token', githubTokenInput.value.trim());
+
+        if (enabled) {
+            body.classList.add('admin-mode');
+        } else {
+            body.classList.remove('admin-mode');
+            resetEditorMode();
+        }
+        adminSettingsModal.classList.remove('show');
+    });
+}
+
+// Admin Inline Code Edit & Save
+if (adminEditCodeBtn && adminSaveCodeBtn && adminCodeTextarea) {
+    adminEditCodeBtn.addEventListener('click', () => {
+        adminCodeTextarea.value = currentLessonCode;
+        modalPre.classList.add('hidden');
+        adminCodeTextarea.classList.remove('hidden');
+        adminEditCodeBtn.classList.add('hidden');
+        adminSaveCodeBtn.classList.remove('hidden');
+        adminCodeTextarea.focus();
+    });
+
+    adminSaveCodeBtn.addEventListener('click', async () => {
+        const newCode = adminCodeTextarea.value;
+        currentLessonCode = newCode;
+
+        const lessonObj = lessons.find(l => l.id === currentLessonId);
+        if (lessonObj) {
+            lessonObj.code = newCode;
+        }
+
+        codeOverrides[currentLessonId] = {
+            ...(codeOverrides[currentLessonId] || {}),
+            code: newCode,
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('cipher_code_overrides', JSON.stringify(codeOverrides));
+
+        modalCode.textContent = currentLessonCode;
+        if (window.Prism) {
+            Prism.highlightElement(modalCode);
+        }
+        resetEditorMode();
+
+        const origHtml = adminSaveCodeBtn.innerHTML;
+        adminEditCodeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+
+        // Try local server save (if running local helper) & GitHub API push
+        let syncedRemote = false;
+        try {
+            const localRes = await fetch('/api/save-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentLessonId, code: newCode, overrides: codeOverrides })
+            });
+            if (localRes.ok) syncedRemote = true;
+        } catch (e) {}
+
+        if (!syncedRemote) {
+            try {
+                const jsonStr = JSON.stringify(codeOverrides, null, 2);
+                syncedRemote = await pushFileToGitHub(
+                    'lessons_overrides.json',
+                    utf8ToBase64(jsonStr),
+                    `Update code for lesson ${currentLessonId}`
+                );
+            } catch (e) {}
+        }
+
+        adminEditCodeBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم حفظ الكود!';
+        setTimeout(() => {
+            adminEditCodeBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> تعديل الكود';
+            adminSaveCodeBtn.innerHTML = origHtml;
+        }, 2200);
+    });
+}
+
+// Admin Copy Ready-Made Infographic Prompt for ChatGPT
+if (adminCopyPromptBtn) {
+    adminCopyPromptBtn.addEventListener('click', () => {
+        const lessonObj = lessons.find(l => l.id === currentLessonId);
+        const title = lessonObj ? lessonObj.title : modalTitle.textContent;
+        const codeText = (!adminCodeTextarea.classList.contains('hidden'))
+            ? adminCodeTextarea.value
+            : currentLessonCode;
+
+        const promptText = `صمم لي صورة إنفوجراف تعليمي احترافي باللغة العربية على شكل ورقة دفتر مدرسي (كشكول مسطر بخطوط أفقية زرقاء فاتحة وهامش جانبي أحمر، مع سحابة برتقالية/مرجانية مرسومة باليد في الأعلى مكتوب بداخلها "طريقة" وعنوان الدرس بخط يدوي عربي واضح وجذاب).
+
+عنوان الحلقة: ${title}
+
+الكود المشروح في الحلقة:
+\`\`\`python
+${codeText}
+\`\`\`
+
+المطلوب في تصميم ورقة الإنفوجراف:
+1. تلخيص فكرة الكود والحلقة في خطوات مرقمة (①، ②، ③، ④) بخط يدوي عربي سليم وواضح جداً على سطور الكشكول.
+2. وضع أمثلة الكود القصيرة داخل صناديق أنيقة مع شرح مبسط لكل سطر بالأسهم المرسومة يدوياً.
+3. إضافة صندوق ملاحظة سريعة أو خلاصة في أسفل الورقة مع شعار أو اسم "قناة شيفرة - لتعلم بايثون".`;
+
+        navigator.clipboard.writeText(promptText).then(() => {
+            const orig = adminCopyPromptBtn.innerHTML;
+            adminCopyPromptBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم نسخ البرومبت! الصقه في ChatGPT';
+            setTimeout(() => {
+                adminCopyPromptBtn.innerHTML = orig;
+            }, 2500);
+        });
+    });
+}
+
+// Admin Upload Infographic Image directly from PC
+if (adminUploadInfographicBtn && adminInfographicFileInput) {
+    adminUploadInfographicBtn.addEventListener('click', () => {
+        adminInfographicFileInput.value = '';
+        adminInfographicFileInput.click();
+    });
+
+    adminInfographicFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const origText = adminUploadInfographicBtn.innerHTML;
+        adminUploadInfographicBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري رفع الصورة...';
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const dataUrl = reader.result;
+            const base64Data = dataUrl.split(',')[1];
+
+            // Save locally in browser for immediate preview/download
+            try {
+                localStorage.setItem(`cipher_infographic_${currentLessonId}`, dataUrl);
+            } catch (err) {
+                // Quota exceeded if image is very large, still push to server/GitHub
+            }
+
+            let uploadedRemote = false;
+            // 1. Try local server if running locally
+            try {
+                const localRes = await fetch('/api/upload-infographic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: currentLessonId, base64: base64Data })
+                });
+                if (localRes.ok) uploadedRemote = true;
+            } catch (err) {}
+
+            // 2. Try GitHub API if token is configured
+            if (!uploadedRemote) {
+                try {
+                    uploadedRemote = await pushFileToGitHub(
+                        `infographics/${currentLessonId}.png`,
+                        base64Data,
+                        `Upload infographic for lesson ${currentLessonId}`
+                    );
+                } catch (err) {}
+            }
+
+            adminUploadInfographicBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم رفع وحفظ الإنفوجراف!';
+            setTimeout(() => {
+                adminUploadInfographicBtn.innerHTML = origText;
+            }, 2500);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 // Download Infographic Image
 if (downloadInfographicBtn) {
     downloadInfographicBtn.addEventListener('click', async () => {
+        // Check if there is a newly uploaded infographic in localStorage first
+        const localDataUrl = localStorage.getItem(`cipher_infographic_${currentLessonId}`);
+        if (localDataUrl) {
+            const a = document.createElement('a');
+            a.href = localDataUrl;
+            a.download = `shefra-lesson-${currentLessonId}-infographic.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return;
+        }
+
         try {
-            const response = await fetch(currentLessonInfographic);
+            const response = await fetch(currentLessonInfographic + '?t=' + Date.now());
             if (!response.ok) {
-                alert('لم يتم رفع ورقة إنفوجراف لهذه الحلقة بعد. ضع الصورة في مجلد infographics باسم ' + currentLessonId + '.png');
+                alert('لم يتم رفع ورقة إنفوجراف لهذه الحلقة بعد.');
                 return;
             }
             const blob = await response.blob();
@@ -801,12 +1114,7 @@ if (downloadInfographicBtn) {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch (err) {
-            const a = document.createElement('a');
-            a.href = currentLessonInfographic;
-            a.download = `shefra-lesson-${currentLessonId}-infographic.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            alert('لم يتم رفع ورقة إنفوجراف لهذه الحلقة بعد.');
         }
     });
 }
