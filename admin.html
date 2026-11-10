@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة إدارة موقع شيفرة | إضافة وتعديل الدروس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 30px 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .back-btn {
+            background-color: var(--card);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #60a5fa;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: #0f172a;
+            color: var(--text);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            outline: none;
+        }
+        textarea.code-input {
+            font-family: 'Fira Code', monospace;
+            direction: ltr;
+            text-align: left;
+            min-height: 160px;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .output-box {
+            margin-top: 20px;
+            display: none;
+        }
+        pre {
+            background-color: #090d16;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #a5d6ff;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-sliders"></i> لوحة إدارة موقع شيفرة</h1>
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-eye"></i> معاينة الموقع</a>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-circle-plus"></i> إضافة حلقة جديدة للموقع بدون كتابة كود</h2>
+            <div class="row">
+                <div class="form-group">
+                    <label>رقم الحلقة الجديدة</label>
+                    <input type="number" id="lesson-id" value="33">
+                </div>
+                <div class="form-group">
+                    <label>رابط فيديو اليوتيوب (أو الـ Video ID)</label>
+                    <input type="text" id="lesson-url" placeholder="مثال: https://youtu.be/BSk-O2s09p4">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>عنوان الحلقة</label>
+                <input type="text" id="lesson-title" placeholder="مثال: الدرس 33: الدوال في بايثون | Functions">
+            </div>
+
+            <div class="form-group">
+                <label>وصف مختصر للحلقة</label>
+                <textarea id="lesson-desc" rows="2" placeholder="شرح مبسط للدوال في لغة بايثون وكيفية تعريف دالة باستخدام def..."></textarea>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>اسم ملف الكود (.py)</label>
+                    <input type="text" id="lesson-filename" value="lesson_33.py">
+                </div>
+                <div class="form-group">
+                    <label>مسار صورة الإنفوجراف</label>
+                    <input type="text" id="lesson-infographic" value="infographics/33.png">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>كود بايثون المشروح في الحلقة</label>
+                <textarea id="lesson-code" class="code-input" placeholder="# اكتب أو الصق كود بايثون هنا&#10;def greet(name):&#10;    print(f'Hello {name}')"></textarea>
+            </div>
+
+            <button class="btn" onclick="generateLessonCode()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> توليد كود الحلقة جاهزاً للإضافة
+            </button>
+
+            <div id="output-area" class="output-box">
+                <p class="hint" style="color: #10b981; font-weight: bold; margin-bottom: 10px;">
+                    ✅ تم تجهيز الحلقة! انسخ الكود التالي وألصقه في نهاية قائمة الدروس داخل ملف script.js (أو أرسله للمساعد ليضيفه لك):
+                </p>
+                <pre id="generated-json"></pre>
+                <button class="btn btn-success" onclick="copyGenerated()">
+                    <i class="fa-regular fa-copy"></i> نسخ الكود
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-circle-info"></i> طريقة إضافة صور الإنفوجراف من ChatGPT</h2>
+            <p style="color: var(--muted);">
+                عندما تولّد صورة إنفوجراف لأي حلقة عبر ChatGPT، احفظ الصورة داخل مجلد <code>infographics</code> الموجود بجوار ملفات الموقع، وسمِّ الصورة برقم الحلقة فقط:
+                <br>• الحلقة 1 👈 <code>infographics/1.png</code>
+                <br>• الحلقة 2 👈 <code>infographics/2.png</code>
+                <br>وسيقوم زر <strong>«تحميل إنفوجراف تلخيص الحلقة»</strong> في الموقع بتحميلها للزائر تلقائياً بجودتها الأصلية!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('lesson-id').addEventListener('input', function() {
+            const num = this.value || '33';
+            document.getElementById('lesson-filename').value = `lesson_${num}.py`;
+            document.getElementById('lesson-infographic').value = `infographics/${num}.png`;
+        });
+
+        function extractYouTubeId(input) {
+            input = input.trim();
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = input.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : input;
+        }
+
+        function generateLessonCode() {
+            const id = parseInt(document.getElementById('lesson-id').value) || 33;
+            const rawUrl = document.getElementById('lesson-url').value;
+            const videoId = extractYouTubeId(rawUrl) || "VIDEO_ID";
+            const title = document.getElementById('lesson-title').value || `الدرس ${id}: عنوان الدرس`;
+            const description = document.getElementById('lesson-desc').value || "شرح مفصل ومبسط ضمن دورة تعلم لغة بايثون من قناة شيفرة.";
+            const filename = document.getElementById('lesson-filename').value || `lesson_${id}.py`;
+            const infographic = document.getElementById('lesson-infographic').value || `infographics/${id}.png`;
+            const code = document.getElementById('lesson-code').value || `# كود الدرس ${id}\nprint("شيفرة")`;
+
+            const escapedCode = code.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
+            const snippet = `    ,
+    {
+        id: ${id},
+        title: ${JSON.stringify(title)},
+        description: ${JSON.stringify(description)},
+        videoId: ${JSON.stringify(videoId)},
+        thumbnail: "https://img.youtube.com/vi/${videoId}/hqdefault.jpg",
+        filename: ${JSON.stringify(filename)},
+        infographic: ${JSON.stringify(infographic)},
+        code: \`${escapedCode}\`
+    }`;
+
+            document.getElementById('generated-json').textContent = snippet;
+            document.getElementById('output-area').style.display = 'block';
+        }
+
+        function copyGenerated() {
+            const text = document.getElementById('generated-json').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ الكود بنجاح!');
+            });
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شيفرة | تعلم بايثون باحترافية من الصفر للاحتراف</title>
+    <meta name="description" content="قناة ومنصة شيفرة لتعلم البرمجة بلغة بايثون (Python) من الصفر للاحتراف باللغة العربية. دروس تفاعلية، أكواد برمجية جاهزة للنسخ والتحميل، وملخصات إنفوجراف لكل حلقة.">
+    <meta name="keywords" content="تعلم بايثون, كورس بايثون بالعربي, شيفرة, برمجة بايثون للمبتدئين, Python tutorial Arabic, متغيرات بايثون, دالة input, الجمل الشرطية في بايثون, القوائم في بايثون, الحلقات التكرارية بايثون">
+    <meta name="author" content="قناة شيفرة - Cipher Python">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <!-- Open Graph / Social Media / Google Ads Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="شيفرة | تعلم لغة بايثون (Python) من الصفر للاحتراف">
+    <meta property="og:description" content="شروحات बाيثون مبسطة وعميقة مع الأكواد البرمجية وملخصات الإنفوجراف القابلة للتحميل.">
+    <meta property="og:image" content="logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Structured Data (Schema.org) for Google Search & Ads Quality Score -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "شيفرة | تعلم بايثون باحترافية",
+          "description": "منصة وقناة شيفرة لتعليم لغة البرمجة بايثون من الصفر للاحتراف",
+          "inLanguage": "ar"
+        },
+        {
+          "@type": "Course",
+          "name": "دورة تعلم لغة بايثون (Python) من الصفر للاحتراف",
+          "description": "دورة شاملة ومجانية مكونة من 32 حلقة لتعلم أساسيات واحتراف لغة البرمجة بايثون مع الأكواد التطبيقية.",
+          "provider": {
+            "@type": "Organization",
+            "name": "قناة شيفرة",
+            "sameAs": "https://youtube.com/@cipher-python"
+          },
+          "inLanguage": "ar",
+          "isAccessibleForFree": true
+        },
+        {
+          "@type": "VideoObject",
+          "name": "لماذا تتعلم لغة بايثون؟ | قناة شيفرة",
+          "description": "مقدمة شاملة حول أهمية تعلم البرمجة بلغة Python وكيف تبدأ رحلتك البرمجية مع قناة شيفرة.",
+          "thumbnailUrl": "https://img.youtube.com/vi/BSk-O2s09p4/maxresdefault.jpg",
+          "uploadDate": "2026-01-01T00:00:00Z",
+          "embedUrl": "https://www.youtube.com/embed/BSk-O2s09p4"
+        }
+      ]
+    }
+    </script>
+
+    <!-- خطوط جوجل للحصول على خط عصري -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة PrismJS لتلوين الكود (ثيم Tomorrow Night المشابه للوضع الليلي) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <!-- ملف التنسيقات الخاص بنا -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dark-theme">
+
+    <!-- شريط التنقل (Navbar) -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="logo.png" alt="شيفرة" class="logo-img">
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">الرئيسية</a></li>
+                <li><a href="#lessons">الدروس والحلقات</a></li>
+                <li><a href="https://youtube.com/@cipher-python" target="_blank" rel="noopener">عن القناة</a></li>
+            </ul>
+            <button id="theme-toggle" class="theme-btn" aria-label="تبديل المظهر">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- القسم الرئيسي (Hero Section) -->
+    <section id="home" class="hero section">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1 class="bounce-in">تعلم لغة <span class="highlight">Python</span> من الصفر للاحتراف</h1>
+                <p class="fade-in">قناة <strong>"شيفرة"</strong> تقدم لك أفضل الشروحات وأعمق الدروس لتصبح مبرمج بايثون
+                    محترف، مدعمة بالأكواد والتطبيقات العملية.</p>
+                <div class="hero-buttons fade-in-up">
+                    <a href="https://youtube.com/@cipher-python" target="_blank" rel="noopener" class="btn btn-primary">
+                        <i class="fa-brands fa-youtube"></i> اشترك في القناة
+                    </a>
+                    <a href="#lessons" class="btn btn-secondary">
+                        <i class="fa-solid fa-play"></i> تصفح الدروس
+                    </a>
+                </div>
+            </div>
+            <div class="hero-video fade-in-left">
+                <!-- الفيديو التعريفي من قناة شيفرة (بدون تشغيل تلقائي لاحتساب المشاهدة الحقيقية) -->
+                <div class="video-wrapper">
+                    <iframe id="hero-iframe" src="https://www.youtube.com/embed/BSk-O2s09p4?rel=0" title="شيفرة - تعلم لغة بايثون" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم الدروس والحلقات -->
+    <section id="lessons" class="lessons section">
+        <div class="container">
+            <div class="section-header">
+                <h2>أحدث <span class="highlight">الدروس</span></h2>
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="search-input" placeholder="ابحث عن حلقة أو موضوع...">
+                </div>
+            </div>
+
+            <div class="lessons-grid" id="lessons-container">
+                <!-- Data will be populated via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- نافذة منبثقة (Modal) لعرض تفاصيل الدرس والكود -->
+    <div id="lesson-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-grid">
+                <div class="modal-video">
+                    <h3 id="modal-title">عنوان الدرس</h3>
+                    <div class="video-wrapper">
+                        <iframe id="modal-iframe" src="" title="YouTube video" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen></iframe>
+                    </div>
+                    <p id="modal-desc" class="modal-desc">وصف الدرس سيظهر هنا.</p>
+                    <a id="playlist-order-link" href="https://youtube.com/playlist?list=PLbpQ4L8JuH6Kdc4j_1gKk2o-WWd0lCqpA" target="_blank" rel="noopener" class="playlist-order-link">
+                        <i class="fa-brands fa-youtube"></i> لمشاهدة الحلقات بالترتيب على قناة شيفرة اضغط هنا
+                    </a>
+                </div>
+
+                <div class="code-column-wrapper">
+                    <div class="code-section">
+                        <div class="editor-header">
+                            <div class="editor-tabs">
+                                <i class="fa-brands fa-python"></i> <span id="modal-filename">main.py</span>
+                            </div>
+                            <div class="editor-actions">
+                                <button id="copy-code-btn" class="icon-btn" title="نسخ الكود">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <button id="download-code-btn" class="icon-btn" title="تحميل الملف">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="editor-body scrollable">
+                            <pre><code id="modal-code" class="language-python"></code></pre>
+                        </div>
+                    </div>
+
+                    <button id="download-infographic-btn" class="infographic-download-btn" title="تحميل ورقة إنفوجراف تلخيص الحلقة">
+                        <i class="fa-solid fa-file-arrow-down"></i> تحميل إنفوجراف تلخيص الحلقة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- التذييل (Footer) -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3><i class="fa-brands fa-python"></i> شيفرة</h3>
+                <p>وجهتك الأولى لاحتراف لغة Python.</p>
+            </div>
+            <div class="social-links">
+                <a href="https://youtube.com/@cipher-python" target="_blank" rel="noopener" aria-label="يوتيوب"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://youtube.com/playlist?list=PLbpQ4L8JuH6Kdc4j_1gKk2o-WWd0lCqpA" target="_blank" rel="noopener" aria-label="قائمة التشغيل"><i class="fa-solid fa-list-ul"></i></a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 جميع الحقوق محفوظة لقناة شيفرة.</p>
+        </div>
+    </footer>
+
+    <!-- مكتبة PrismJS لتلوين بناء الجملة (Syntax Highlighting) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <!-- ملف الجافاسكربت الخاص بنا -->
+    <script src="script.js"></script>
+</body>
+
+</html>
