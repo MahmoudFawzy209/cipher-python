@@ -597,6 +597,11 @@ const body = document.body;
 const themeToggleBtn = document.getElementById('theme-toggle');
 const searchInput = document.getElementById('search-input');
 const lessonsContainer = document.getElementById('lessons-container');
+const showMoreWrapper = document.getElementById('show-more-wrapper');
+const showMoreBtn = document.getElementById('show-more-btn');
+
+let showAllLessons = false;
+const INITIAL_VISIBLE_COUNT = 3;
 
 // Modal Elements
 const modal = document.getElementById('lesson-modal');
@@ -643,15 +648,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Render Lessons function
-function renderLessons(lessonsToRender) {
+function renderLessons(lessonsToRender, isSearching = false) {
     lessonsContainer.innerHTML = ''; // Clear container
 
     if (lessonsToRender.length === 0) {
         lessonsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">لا توجد نتائج مطابقة للبحث.</p>';
+        if (showMoreWrapper) showMoreWrapper.classList.add('hidden');
         return;
     }
 
-    lessonsToRender.forEach(lesson => {
+    const visibleLessons = (!showAllLessons && !isSearching)
+        ? lessonsToRender.slice(0, INITIAL_VISIBLE_COUNT)
+        : lessonsToRender;
+
+    visibleLessons.forEach(lesson => {
         const card = document.createElement('div');
         card.className = 'lesson-card';
         card.innerHTML = `
@@ -670,16 +680,35 @@ function renderLessons(lessonsToRender) {
 
         lessonsContainer.appendChild(card);
     });
+
+    if (showMoreWrapper) {
+        if (!showAllLessons && !isSearching && lessonsToRender.length > INITIAL_VISIBLE_COUNT) {
+            showMoreWrapper.classList.remove('hidden');
+        } else {
+            showMoreWrapper.classList.add('hidden');
+        }
+    }
+}
+
+if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', () => {
+        showAllLessons = true;
+        renderLessons(lessons);
+    });
 }
 
 // Search functionality
 searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
+    const term = e.target.value.trim().toLowerCase();
+    if (term === '') {
+        renderLessons(lessons, false);
+        return;
+    }
     const filtered = lessons.filter(lesson =>
         lesson.title.toLowerCase().includes(term) ||
         lesson.description.toLowerCase().includes(term)
     );
-    renderLessons(filtered);
+    renderLessons(filtered, true);
 });
 
 // Open Modal Data Population
