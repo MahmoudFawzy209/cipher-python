@@ -704,21 +704,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         body.classList.add('admin-mode');
     }
 
-    // Auto-load local Gemini key from .env if running on localhost
+    // Apply any cached local overrides immediately and render lessons in 0ms without waiting for network
+    try {
+        const localSaved = localStorage.getItem('cipher_code_overrides');
+        if (localSaved) {
+            codeOverrides = JSON.parse(localSaved);
+            lessons.forEach(lesson => {
+                if (codeOverrides[lesson.id] && codeOverrides[lesson.id].code) {
+                    lesson.code = codeOverrides[lesson.id].code;
+                }
+            });
+        }
+    } catch (e) {}
+
+    renderLessons(lessons); // Instant render (0ms)
+
+    // Load remote overrides & local config asynchronously in background
+    loadLessonOverrides();
+
     if (!localStorage.getItem('cipher_gemini_key')) {
-        try {
-            const cfgRes = await fetch('/api/local-config');
-            if (cfgRes.ok) {
-                const cfg = await cfgRes.json();
-                if (cfg.geminiKey) {
+        fetch('/api/local-config')
+            .then(r => r.ok ? r.json() : null)
+            .then(cfg => {
+                if (cfg && cfg.geminiKey) {
                     localStorage.setItem('cipher_gemini_key', cfg.geminiKey);
                 }
-            }
-        } catch (e) {}
+            })
+            .catch(() => {});
     }
-
-    await loadLessonOverrides();
-    renderLessons(lessons); // Render lessons on load
 });
 
 // Render Lessons function
