@@ -777,6 +777,14 @@ body.admin-mode .admin-save-btn:hover {
     background-color: #059669;
 }
 
+body.admin-mode .admin-format-btn {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+
+body.admin-mode .admin-format-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
 .admin-code-textarea {
     width: 100%;
     height: 100%;

@@ -171,6 +171,9 @@
                                 <button id="admin-edit-code-btn" class="admin-only-btn" title="تعديل الكود بيدك">
                                     <i class="fa-solid fa-pen-to-square"></i> تعديل الكود
                                 </button>
+                                <button id="admin-format-code-btn" class="admin-only-btn admin-format-btn" title="إرسال الكود لـ Gemini لتنسيقه وترتيب التعليقات (إنجليزي يسار وعربي يمين)">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> تنسيق الكود (Gemini)
+                                </button>
                                 <button id="admin-save-code-btn" class="admin-only-btn admin-save-btn hidden" title="حفظ الكود">
                                     <i class="fa-solid fa-floppy-disk"></i> حفظ الكود
                                 </button>
@@ -220,6 +223,11 @@
                         <input type="checkbox" id="admin-mode-checkbox">
                         <span>تفعيل وضع الأدمن (تعديل الأكواد ورفع الإنفوجراف داخل الموقع)</span>
                     </label>
+                </div>
+                <div class="admin-token-group">
+                    <label for="gemini-key-input">مفتاح Gemini API المجاني (لتنسيق الكود بالذكاء الاصطناعي):</label>
+                    <input type="password" id="gemini-key-input" placeholder="AIzaSy...">
+                    <small>احصل عليه مجاناً بدون بطاقة بنكية بضغطة واحدة من <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: underline;">Google AI Studio</a> ليعمل زر «تنسيق الكود (Gemini)» تلقائياً.</small>
                 </div>
                 <div class="admin-token-group">
                     <label for="github-token-input">مفتاح GitHub Token (اختياري - للحفظ المباشر على كلودفلير وGitHub):</label>

@@ -621,9 +621,11 @@ const adminLockBtn = document.getElementById('admin-lock-btn');
 const adminSettingsModal = document.getElementById('admin-settings-modal');
 const closeAdminModalBtn = document.getElementById('close-admin-modal');
 const adminModeCheckbox = document.getElementById('admin-mode-checkbox');
+const geminiKeyInput = document.getElementById('gemini-key-input');
 const githubTokenInput = document.getElementById('github-token-input');
 const saveAdminSettingsBtn = document.getElementById('save-admin-settings-btn');
 const adminEditCodeBtn = document.getElementById('admin-edit-code-btn');
+const adminFormatCodeBtn = document.getElementById('admin-format-code-btn');
 const adminSaveCodeBtn = document.getElementById('admin-save-code-btn');
 const adminCodeTextarea = document.getElementById('admin-code-textarea');
 const adminCopyPromptBtn = document.getElementById('admin-copy-prompt-btn');
@@ -898,6 +900,9 @@ function utf8ToBase64(str) {
 if (adminLockBtn && adminSettingsModal) {
     adminLockBtn.addEventListener('click', () => {
         adminModeCheckbox.checked = body.classList.contains('admin-mode');
+        if (geminiKeyInput) {
+            geminiKeyInput.value = localStorage.getItem('cipher_gemini_key') || '';
+        }
         githubTokenInput.value = localStorage.getItem('cipher_github_token') || '';
         adminSettingsModal.classList.add('show');
     });
@@ -915,6 +920,9 @@ if (adminLockBtn && adminSettingsModal) {
     saveAdminSettingsBtn.addEventListener('click', () => {
         const enabled = adminModeCheckbox.checked;
         localStorage.setItem('cipher_admin_mode', enabled ? 'true' : 'false');
+        if (geminiKeyInput) {
+            localStorage.setItem('cipher_gemini_key', geminiKeyInput.value.trim());
+        }
         localStorage.setItem('cipher_github_token', githubTokenInput.value.trim());
 
         if (enabled) {
@@ -924,6 +932,111 @@ if (adminLockBtn && adminSettingsModal) {
             resetEditorMode();
         }
         adminSettingsModal.classList.remove('show');
+    });
+}
+
+// Smart local fallback formatter for bilingual comments (English on left, Arabic on right)
+function smartLocalFormatPython(rawCode, lessonTitle) {
+    const lines = rawCode.replace(/\r\n/g, '\n').split('\n');
+    const formatted = [];
+    for (let line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('#')) {
+            const commentBody = trimmed.slice(1).trim();
+            // If comment has a colon separating Arabic on the left and English on the right, swap so English is on left and Arabic on right
+            if (commentBody.includes(':')) {
+                const parts = commentBody.split(':');
+                const left = parts[0].trim();
+                const right = parts.slice(1).join(':').trim();
+                const hasArabicLeft = /[\u0600-\u06FF]/.test(left);
+                const hasEnglishRight = /[A-Za-z]/.test(right) && !/[\u0600-\u06FF]/.test(right);
+                if (hasArabicLeft && hasEnglishRight) {
+                    const indent = line.match(/^\s*/)[0];
+                    formatted.push(`${indent}# ${right} : ${left}`);
+                    continue;
+                }
+            }
+        }
+        formatted.push(line);
+    }
+    return formatted.join('\n').trim();
+}
+
+// Admin Format Code with Gemini AI Button
+if (adminFormatCodeBtn && adminCodeTextarea) {
+    adminFormatCodeBtn.addEventListener('click', async () => {
+        // Switch into edit mode automatically so user can review before clicking Save
+        if (adminCodeTextarea.classList.contains('hidden')) {
+            adminCodeTextarea.value = currentLessonCode;
+            modalPre.classList.add('hidden');
+            adminCodeTextarea.classList.remove('hidden');
+            adminEditCodeBtn.classList.add('hidden');
+            adminSaveCodeBtn.classList.remove('hidden');
+        }
+
+        const rawCode = adminCodeTextarea.value.trim();
+        if (!rawCode) return;
+
+        let apiKey = (localStorage.getItem('cipher_gemini_key') || '').trim();
+        if (!apiKey) {
+            const entered = prompt('لتنسيق الكود عبر Gemini مجاناً، الصق مفتاح Gemini API Key من Google AI Studio (أو اضغط إلغاء للتنسيق المحلي السريع):');
+            if (entered && entered.trim()) {
+                apiKey = entered.trim();
+                localStorage.setItem('cipher_gemini_key', apiKey);
+                if (geminiKeyInput) geminiKeyInput.value = apiKey;
+            }
+        }
+
+        const origHtml = adminFormatCodeBtn.innerHTML;
+        adminFormatCodeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تنسيق الكود...';
+
+        const lessonObj = lessons.find(l => l.id === currentLessonId);
+        const title = lessonObj ? lessonObj.title : modalTitle.textContent;
+
+        if (apiKey) {
+            try {
+                const systemPrompt = `أنت خبير في تنسيق أكواد لغة بايثون (Python) التعليمية لقناة "شيفرة".
+المطلوب: إعادة تنظيم وتنسيق الكود التالي ليصبح كوداً بصرياً جذاباً ومنظماً وقابلاً للتحميل، مع الالتزام الصارم بهذه القواعد:
+1. حافظ على منطق الكود البرمجي وأوامر بايثون صحيحة 100% مع مسافات بادئة وأسطر فارغة مريحة للعين.
+2. في جميع التعليقات التوضيحية (#)، اكتب دائماً المصطلح الإنجليزي في بداية السطر على اليسار متبوعاً بنقطتين (:) ثم الشرح العربي المختصر على اليمين، بهذا الشكل حصراً:
+# Variable / Concept : الشرح المختصر باللغة العربية
+(حتى لا ينعكس اتجاه النص العربي مع الإنجليزي).
+3. أضف فواصل أقسام أنيقة عند الحاجة مثل:
+# _________________________________________________
+4. أعد الكود البرمجي فقط بدون أي نص خارجه وبدون علامات \`\`\`python.`;
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: `${systemPrompt}\n\nعنوان الحلقة: ${title}\n\nالكود المراد تنسيقه:\n${rawCode}` }]
+                        }]
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    let formattedCode = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    formattedCode = formattedCode.replace(/^```python\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '').trim();
+                    if (formattedCode) {
+                        adminCodeTextarea.value = formattedCode;
+                        adminFormatCodeBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم التنسيق بـ Gemini! راجعه واضغط حفظ';
+                        setTimeout(() => { adminFormatCodeBtn.innerHTML = origHtml; }, 2800);
+                        return;
+                    }
+                } else {
+                    alert('تأكد من صحة مفتاح Gemini API في إعدادات الأدمن (أيقونة القفل في الأسفل). سيتم تطبيق التنسيق المحلي السريع الآن.');
+                }
+            } catch (err) {
+                // Fallback to smart local formatter
+            }
+        }
+
+        // Fallback local formatting
+        adminCodeTextarea.value = smartLocalFormatPython(rawCode, title);
+        adminFormatCodeBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم التنسيق! راجعه واضغط حفظ';
+        setTimeout(() => { adminFormatCodeBtn.innerHTML = origHtml; }, 2500);
     });
 }
 
