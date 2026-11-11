@@ -697,6 +697,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         body.classList.add('admin-mode');
     }
 
+    // Auto-load local Gemini key from .env if running on localhost
+    if (!localStorage.getItem('cipher_gemini_key')) {
+        try {
+            const cfgRes = await fetch('/api/local-config');
+            if (cfgRes.ok) {
+                const cfg = await cfgRes.json();
+                if (cfg.geminiKey) {
+                    localStorage.setItem('cipher_gemini_key', cfg.geminiKey);
+                }
+            }
+        } catch (e) {}
+    }
+
     await loadLessonOverrides();
     renderLessons(lessons); // Render lessons on load
 });

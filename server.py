@@ -10,6 +10,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)
 
 
+def read_env_key(key_name):
+    env_path = os.path.join(BASE_DIR, ".env")
+    if not os.path.exists(env_path):
+        return ""
+    try:
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith(key_name + "="):
+                    return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return ""
+
+
 def git_auto_sync(message):
     try:
         subprocess.run(["git", "add", "."], cwd=BASE_DIR, check=False)
@@ -20,6 +35,12 @@ def git_auto_sync(message):
 
 
 class CipherAdminHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith("/api/local-config"):
+            self._send_json(200, {"ok": True, "geminiKey": read_env_key("GEMINI_API_KEY")})
+            return
+        super().do_GET()
+
     def do_POST(self):
         content_length = int(self.headers.get("Content-Length", 0))
         raw_body = self.rfile.read(content_length)
@@ -72,4 +93,3 @@ if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), CipherAdminHandler) as httpd:
         print(f"Cipher Python server running at http://localhost:{PORT}/")
         httpd.serve_forever()
-
