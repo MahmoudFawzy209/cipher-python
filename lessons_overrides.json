@@ -4,7 +4,7 @@
     "updatedAt": "2026-11-10T21:50:03.751Z"
   },
   "2": {
-    "code": "#_________________ Data Type : أنواع البيانات_____________\n# Strings : النصوص \n# syntax : قواعد كتابة الكود \n\nprint(\"Hello person\")\n\n# variables : متغيرات\n# Data = value\n\nname = \"person\"\nprint(name)\n\nuser = 'ahmed'\nprint(user)",
-    "updatedAt": "2026-11-10T21:51:41.087Z"
+    "code": "#_________________ Data Type : أنواع البيانات_____________\n# Strings : النصوص \n# syntax : قواعد كتابة الكود \n\n\nprint(\"Hello person\")\n\n# variables : متغيرات\n# Data = value\n\nname = \"person\"\n\n\n\nprint(name)\n\nuser = 'ahmed'\n\nprint(user)\nprint(user)\nprint(user)\nprint(user)\nprint(user)\n\n\n\n\n",
+    "updatedAt": "2026-11-11T19:12:42.938Z"
   }
 }
