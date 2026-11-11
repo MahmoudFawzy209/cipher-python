@@ -650,7 +650,14 @@ async function loadLessonOverrides() {
         const res = await fetch('lessons_overrides.json?t=' + Date.now());
         if (res.ok) {
             const remoteOverrides = await res.json();
-            codeOverrides = { ...remoteOverrides, ...codeOverrides };
+            Object.keys(remoteOverrides).forEach(id => {
+                const localItem = codeOverrides[id];
+                const remoteItem = remoteOverrides[id];
+                if (!localItem || !localItem.updatedAt || (remoteItem.updatedAt && remoteItem.updatedAt >= localItem.updatedAt)) {
+                    codeOverrides[id] = remoteItem;
+                }
+            });
+            localStorage.setItem('cipher_code_overrides', JSON.stringify(codeOverrides));
         }
     } catch (e) {
         // Ignore fetch errors when offline
@@ -793,6 +800,38 @@ function resetEditorMode() {
     }
 }
 
+function highlightAndFixComments(codeElement) {
+    if (!codeElement) return;
+    if (window.Prism) {
+        Prism.highlightElement(codeElement);
+    }
+    // Fix bidirectional rendering inside comments so Arabic sentences with English words (e.g. (String), 'name')
+    // and English-first term pairs (e.g. # Strings : النصوص) both display in their natural reading order
+    const commentNodes = codeElement.querySelectorAll('.token.comment');
+    commentNodes.forEach(node => {
+        const text = node.textContent || '';
+        const match = text.match(/^(\s*#[_\-\s←]*)(.*)$/s);
+        if (!match) return;
+        const prefix = match[1];
+        const body = match[2];
+        if (!body) return;
+
+        // Find the first strong directional letter (Arabic vs Latin)
+        const firstStrongMatch = body.match(/[\u0600-\u06FFa-zA-Z]/);
+        const isArabicFirst = firstStrongMatch && /[\u0600-\u06FF]/.test(firstStrongMatch[0]);
+
+        node.textContent = '';
+        const prefixSpan = document.createTextNode(prefix);
+        const bodySpan = document.createElement('span');
+        bodySpan.setAttribute('dir', isArabicFirst ? 'rtl' : 'ltr');
+        bodySpan.style.unicodeBidi = 'isolate';
+        bodySpan.textContent = body;
+
+        node.appendChild(prefixSpan);
+        node.appendChild(bodySpan);
+    });
+}
+
 function openModal(lesson) {
     modalTitle.textContent = lesson.title;
     modalDesc.textContent = lesson.description;
@@ -810,10 +849,8 @@ function openModal(lesson) {
     if (adminCodeTextarea) {
         adminCodeTextarea.value = currentLessonCode;
     }
-    // Trigger PrismJS syntax highlighting
-    if (window.Prism) {
-        Prism.highlightElement(modalCode);
-    }
+    // Trigger PrismJS syntax highlighting and Bidi comment fix
+    highlightAndFixComments(modalCode);
 
     modal.classList.add('show');
     document.body.style.overflow = 'hidden'; // Prevent background scroll
@@ -1009,14 +1046,29 @@ if (adminFormatCodeBtn && adminCodeTextarea) {
         if (apiKey) {
             try {
                 const systemPrompt = `أنت خبير في تنسيق أكواد لغة بايثون (Python) التعليمية لقناة "شيفرة".
-المطلوب: إعادة تنظيم وتنسيق الكود التالي ليصبح كوداً بصرياً جذاباً ومنظماً وقابلاً للتحميل، مع الالتزام الصارم بهذه القواعد:
-1. حافظ على منطق الكود البرمجي وأوامر بايثون صحيحة 100% مع مسافات بادئة وأسطر فارغة مريحة للعين.
-2. في جميع التعليقات التوضيحية (#)، اكتب دائماً المصطلح الإنجليزي في بداية السطر على اليسار متبوعاً بنقطتين (:) ثم الشرح العربي المختصر على اليمين، بهذا الشكل حصراً:
-# Variable / Concept : الشرح المختصر باللغة العربية
-(حتى لا ينعكس اتجاه النص العربي مع الإنجليزي).
-3. أضف فواصل أقسام أنيقة عند الحاجة مثل:
-# _________________________________________________
-4. أعد الكود البرمجي فقط بدون أي نص خارجه وبدون علامات \`\`\`python.`;
+المطلوب: إعادة تنظيم وتنسيق الكود التالي ليصبح كوداً بصرياً بسيطاً، نظيفاً، ومنظماً بدون أي حشو بصري أو تكرار، مع الالتزام الصارم بهذه القواعد:
+
+1. ممنوع تماماً كتابة كلمات أو عناوين حشو إنجليزية زائدة مثل:
+   "Episode", "Concept", "Definition", "Example", "Literal String", "Variable Assignment", "Print Repetition" أو ما يشبهها.
+
+2. عند تقديم مصطلح برمجي أساسي، اكتب المصطلح نفسه مباشرة ثم معناه بالعربية، مثل:
+   # Strings : النصوص
+   # Variable : المتغير
+   (ولا تكتب أبداً "# Concept : النصوص (Strings)").
+
+3. عند كتابة تعريف لمفهوم، اكتب التعريف بالعربية مباشرة بدون كلمة Definition، مثل:
+   # سلسلة من الحروف أو الرموز تُستخدم لتمثيل النصوص
+
+4. عند شرح سطر كود أو متغير، اكتب الشرح المختصر بالعربية مباشرة بدون مقدمات إنجليزية زائدة، مثل:
+   # إضافة قيمة نصية (String) للمتغير 'name'
+   # تكرار طباعة قيمة المتغير 'user' عدة مرات
+   (ولا تكتب "# Variable Assignment : ..." ولا "# Print Repetition : ...").
+
+5. عند الإشارة لمثال أو توضيح مباشر، استخدم هاش متبوعاً بسهم (# ←) مباشرة بدون كلمة Example، مثل:
+   # ← طباعة نص مباشر
+
+6. لا تكرر التعليقات ولا تزدحم الصفحة بالحشو البصري؛ اجعل الفواصل والتعليقات مختصرة ومفيدة فقط.
+7. أعد الكود البرمجي فقط بدون أي نص خارجه وبدون علامات \`\`\`python.`;
 
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
                     method: 'POST',
@@ -1081,9 +1133,7 @@ if (adminEditCodeBtn && adminSaveCodeBtn && adminCodeTextarea) {
         localStorage.setItem('cipher_code_overrides', JSON.stringify(codeOverrides));
 
         modalCode.textContent = currentLessonCode;
-        if (window.Prism) {
-            Prism.highlightElement(modalCode);
-        }
+        highlightAndFixComments(modalCode);
         resetEditorMode();
 
         const origHtml = adminSaveCodeBtn.innerHTML;
