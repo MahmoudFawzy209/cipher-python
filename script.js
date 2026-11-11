@@ -8,8 +8,8 @@ const lessons = [
         thumbnail: "https://img.youtube.com/vi/UEPBHsuZZSU/hqdefault.jpg",
         filename: "lesson_1_intro.py",
         infographic: "infographics/1.png",
-        code: `# الدرس الأول: طباعة أول سطر كود في بايثون
-# دالة print تستخدم لعرض المخرجات على الشاشة
+        code: `# print() : دالة طباعة وعرض المخرجات على الشاشة
+# Lesson 1 : طباعة أول سطر كود في بايثون
 
 print("Hello World")
 print("مرحباً بكم في قناة شيفرة لتعلم بايثون!")`
@@ -45,7 +45,7 @@ print(user)`
         thumbnail: "https://img.youtube.com/vi/yNL7sYqWFrE/hqdefault.jpg",
         filename: "lesson_3_integers.py",
         infographic: "infographics/3.png",
-        code: `# المتغيرات الرقمية: الأعداد الصحيحة (integers - int)
+        code: `# Integers (int) : المتغيرات الرقمية (الأعداد الصحيحة)
 
 age = 25
 year = 2026
@@ -62,7 +62,7 @@ print(type(age))  # <class 'int'>`
         thumbnail: "https://img.youtube.com/vi/B7OVzgOyCQo/hqdefault.jpg",
         filename: "lesson_4_floats.py",
         infographic: "infographics/4.png",
-        code: `# المتغيرات الرقمية: الأعداد العشرية (float)
+        code: `# Float : المتغيرات الرقمية (الأعداد العشرية)
 
 price = 99.5
 pi = 3.14
@@ -79,18 +79,18 @@ print(type(price))  # <class 'float'>`
         thumbnail: "https://img.youtube.com/vi/b0J0ZOc8WME/hqdefault.jpg",
         filename: "lesson_5_math.py",
         infographic: "infographics/5.png",
-        code: `# العمليات الحسابية في بايثون
+        code: `# Mathematics : العمليات الحسابية في بايثون
 
 x = 10
 y = 3
 
-print(x + y)   # الجمع: 13
-print(x - y)   # الطرح: 7
-print(x * y)   # الضرب: 30
-print(x / y)   # القسمة العادية: 3.333
-print(x // y)  # القسمة الصحيحة: 3
-print(x % y)   # باقي القسمة: 1
-print(x ** y)  # الأسس: 1000`
+print(x + y)   # Addition (الجمع)
+print(x - y)   # Subtraction (الطرح)
+print(x * y)   # Multiplication (الضرب)
+print(x / y)   # Division (القسمة العادية)
+print(x // y)  # Floor Division (القسمة الصحيحة)
+print(x % y)   # Modulus (باقي القسمة)
+print(x ** y)  # Exponent (الأسس)`
     },
     {
         id: 6,
@@ -100,17 +100,17 @@ print(x ** y)  # الأسس: 1000`
         thumbnail: "https://img.youtube.com/vi/0crdxnvPvXk/hqdefault.jpg",
         filename: "lesson_6_arithmetic_logic.py",
         infographic: "infographics/6.png",
-        code: `# ترتيب أولويات العمليات الحسابية في بايثون
-# 1. الأقواس ()
-# 2. الأسس **
-# 3. الضرب والقسمة * /
-# 4. الجمع والطرح + -
+        code: `# Operator Precedence : ترتيب أولويات العمليات الحسابية
+# 1. ()  : الأقواس
+# 2. **  : الأسس
+# 3. * / : الضرب والقسمة
+# 4. + - : الجمع والطرح
 
 result1 = 10 + 5 * 2
-print(result1)  # الناتج: 20
+print(result1)  # Output = 20
 
 result2 = (10 + 5) * 2
-print(result2)  # الناتج: 30`
+print(result2)  # Output = 30`
     },
     {
         id: 7,
@@ -120,19 +120,19 @@ print(result2)  # الناتج: 30`
         thumbnail: "https://img.youtube.com/vi/6QN_F80XRvk/hqdefault.jpg",
         filename: "lesson_7_concatenation.py",
         infographic: "infographics/7.png",
-        code: `# الفرق بين الجمع (Addition) والدمج (Concatenation)
+        code: `# Addition vs Concatenation : الفرق بين الجمع والدمج
 
-# جمع الأرقام
+# Addition : جمع الأرقام
 num1 = 20
 num2 = 30
 print(num1 + num2)  # 50
 
-# دمج النصوص
+# Concatenation : دمج النصوص
 first_name = "أحمد "
 last_name = "محمد"
-print(first_name + last_name)  # أحمد محمد
+print(first_name + last_name)
 
-# دمج النصوص الرقمية
+# Numeric Strings : دمج النصوص الرقمية
 print("20" + "30")  # 2030`
     },
     {
@@ -143,18 +143,18 @@ print("20" + "30")  # 2030`
         thumbnail: "https://img.youtube.com/vi/OsB4LssMzzQ/hqdefault.jpg",
         filename: "lesson_8_casting.py",
         infographic: "infographics/8.png",
-        code: `# تحويل أنواع البيانات (Data Casting)
+        code: `# Data Casting : تحويل أنواع البيانات
 
 text_number = "20"
 real_number = int(text_number)
 
 print(real_number + 10)  # 30
 
-# تحويل الرقم العشري إلى عدد صحيح
+# float to int : تحويل الرقم العشري إلى عدد صحيح
 decimal_num = 15.8
 print(int(decimal_num))  # 15
 
-# تحويل الرقم إلى نص
+# int to str : تحويل الرقم إلى نص
 age = 25
 print("عمري هو: " + str(age))`
     },
@@ -166,12 +166,12 @@ print("عمري هو: " + str(age))`
         thumbnail: "https://img.youtube.com/vi/jm6cInUaxzA/hqdefault.jpg",
         filename: "lesson_9_input.py",
         infographic: "infographics/9.png",
-        code: `# دالة الإدخال input() للتفاعل مع المستخدم
+        code: `# input() : دالة الإدخال للتفاعل مع المستخدم
 
 user_name = input("ما هو اسمك؟ ")
 print("مرحباً بك يا " + user_name + " في عالم بايثون!")
 
-# جميع البيانات الراجعة من input تكون من نوع نص (str)
+# Note (str) : جميع البيانات الراجعة من دالة الإدخال تكون نصية
 print(type(user_name))`
     },
     {
@@ -182,7 +182,7 @@ print(type(user_name))`
         thumbnail: "https://img.youtube.com/vi/ir8T4j0ig0M/hqdefault.jpg",
         filename: "lesson_10_input_int.py",
         infographic: "infographics/10.png",
-        code: `# برنامج حساب سنة الميلاد باستخدام input() و int()
+        code: `# int(input()) : تحويل مدخلات المستخدم إلى عدد صحيح
 
 current_year = 2026
 age = int(input("أدخل عمرك الحالي: "))
@@ -198,7 +198,7 @@ print("سنة ميلادك هي:", birth_year)`
         thumbnail: "https://img.youtube.com/vi/qgxRxU-HrAA/hqdefault.jpg",
         filename: "lesson_11_input_part3.py",
         infographic: "infographics/11.png",
-        code: `# حاسبة جمع رقمين من المستخدم
+        code: `# Calculator : حاسبة جمع رقمين من المستخدم
 
 num1 = float(input("أدخل الرقم الأول: "))
 num2 = float(input("أدخل الرقم الثاني: "))
@@ -214,16 +214,16 @@ print("مجموع الرقمين هو:", total)`
         thumbnail: "https://img.youtube.com/vi/_vMV2WhYqHE/hqdefault.jpg",
         filename: "lesson_12_comparison.py",
         infographic: "infographics/12.png",
-        code: `# معاملات المقارنة (Comparison Operators)
+        code: `# Comparison Operators : معاملات المقارنة
 
 x = 10
 y = 5
 
-print(x == y)  # هل يساوي؟ False
-print(x != y)  # هل لا يساوي؟ True
-print(x > y)   # هل أكبر من؟ True
-print(x < y)   # هل أصغر من؟ False
-print(x >= 10) # هل أكبر من أو يساوي؟ True`
+print(x == y)  # Equal (هل يساوي؟)
+print(x != y)  # Not Equal (هل لا يساوي؟)
+print(x > y)   # Greater than (هل أكبر من؟)
+print(x < y)   # Less than (هل أصغر من؟)
+print(x >= 10) # Greater or Equal (أكبر من أو يساوي)`
     },
     {
         id: 13,
@@ -233,7 +233,7 @@ print(x >= 10) # هل أكبر من أو يساوي؟ True`
         thumbnail: "https://img.youtube.com/vi/4t-HxWv789w/hqdefault.jpg",
         filename: "lesson_13_if_condition.py",
         infographic: "infographics/13.png",
-        code: `# الجملة الشرطية if
+        code: `# if condition : الجملة الشرطية
 
 score = int(input("أدخل درجتك: "))
 
@@ -249,7 +249,7 @@ if score >= 50:
         thumbnail: "https://img.youtube.com/vi/zAjB2Gjg2aU/hqdefault.jpg",
         filename: "lesson_14_elif_else.py",
         infographic: "infographics/14.png",
-        code: `# الجمل الشرطية الكاملة: if / elif / else
+        code: `# if / elif / else : الجمل الشرطية المتعددة
 
 degree = int(input("أدخل الدرجة: "))
 
@@ -270,7 +270,7 @@ else:
         thumbnail: "https://img.youtube.com/vi/UoxH4-0pT14/hqdefault.jpg",
         filename: "lesson_15_logical_operators.py",
         infographic: "infographics/15.png",
-        code: `# المعاملات المنطقية: and / or
+        code: `# Logical Operators (and / or) : المعاملات المنطقية
 
 age = 20
 has_id = True
@@ -288,7 +288,7 @@ else:
         thumbnail: "https://img.youtube.com/vi/vtD2NBwNDRI/hqdefault.jpg",
         filename: "lesson_16_logical_part2.py",
         infographic: "infographics/16.png",
-        code: `# تطبيق عملي على التحقق من بيانات تسجيل الدخول
+        code: `# Login Check : التحقق من بيانات تسجيل الدخول
 
 username = input("اسم المستخدم: ")
 password = input("كلمة المرور: ")
@@ -306,7 +306,7 @@ else:
         thumbnail: "https://img.youtube.com/vi/yW4Wt5bZobo/hqdefault.jpg",
         filename: "lesson_17_truthy_falsy.py",
         infographic: "infographics/17.png",
-        code: `# التحقق من وجود بيانات في المتغير
+        code: `# bool() : التحقق من وجود بيانات في المتغير
 
 name = input("أدخل اسمك: ")
 
@@ -323,15 +323,15 @@ else:
         thumbnail: "https://img.youtube.com/vi/EdytFzRKZXU/hqdefault.jpg",
         filename: "lesson_18_indexing_slicing.py",
         infographic: "infographics/18.png",
-        code: `# الفهرسة (Indexing) والتقطيع (Slicing)
-# العد في بايثون يبدأ دائماً من الصفر 0
+        code: `# Indexing & Slicing : الفهرسة والاقتطاع في النصوص
+# Index 0 : العد في بايثون يبدأ دائماً من الصفر
 
 word = "Python"
 
-print(word[0])    # الحرف الأول: P
-print(word[-1])   # الحرف الأخير: n
-print(word[0:3])  # اقتطاع أول 3 أحرف: Pyt
-print(word[2:])   # من الفهرس 2 للنهاية: thon`
+print(word[0])    # First char : الحرف الأول
+print(word[-1])   # Last char : الحرف الأخير
+print(word[0:3])  # Slice : اقتطاع أول ثلاثة أحرف
+print(word[2:])   # Slice to end : من الفهرس الثاني للنهاية`
     },
     {
         id: 19,
@@ -341,7 +341,7 @@ print(word[2:])   # من الفهرس 2 للنهاية: thon`
         thumbnail: "https://img.youtube.com/vi/imqNpvR8Hpw/hqdefault.jpg",
         filename: "lesson_19_membership.py",
         infographic: "infographics/19.png",
-        code: `# معامل العضوية (in / not in)
+        code: `# Membership (in / not in) : معامل العضوية
 
 email = input("أدخل بريدك الإلكتروني: ")
 
@@ -358,7 +358,7 @@ else:
         thumbnail: "https://img.youtube.com/vi/NhhITKWKByA/hqdefault.jpg",
         filename: "lesson_20_fstring.py",
         infographic: "infographics/20.png",
-        code: `# تنسيق النصوص باستخدام f-string و Escape Characters
+        code: `# f-string & Escape Characters : تنسيق النصوص
 
 name = "عمر"
 age = 22
@@ -374,14 +374,14 @@ print("العمود الأول\\tالعمود الثاني")`
         thumbnail: "https://img.youtube.com/vi/nzb7RjdQ5GI/hqdefault.jpg",
         filename: "lesson_21_fstring_numbers.py",
         infographic: "infographics/21.png",
-        code: `# تنسيق الأرقام العشرية باستخدام f-string
+        code: `# Formatting Numbers (f-string) : تنسيق الأرقام العشرية
 
 price = 1250.56789
 
-# تقريب لخانتين عشريتين فقط
+# .2f : تقريب لخانتين عشريتين فقط
 print(f"السعر بعد التقريب: {price:.2f}")
 
-# إضافة فاصلة الآلاف
+# Comma separator : إضافة فاصلة الآلاف
 balance = 1000000
 print(f"الرصيد: {balance:,} جنيه")`
     },
@@ -393,7 +393,7 @@ print(f"الرصيد: {balance:,} جنيه")`
         thumbnail: "https://img.youtube.com/vi/sRptdlu4XSo/hqdefault.jpg",
         filename: "lesson_22_lists.py",
         infographic: "infographics/22.png",
-        code: `# القوائم في بايثون (Lists)
+        code: `# Lists : القوائم في بايثون
 
 students = ["أحمد", "سارة", "محمد", "نور"]
 
@@ -409,17 +409,17 @@ print("عدد الطلاب:", len(students))`
         thumbnail: "https://img.youtube.com/vi/MbMnAWRD_c4/hqdefault.jpg",
         filename: "lesson_23_lists_methods.py",
         infographic: "infographics/23.png",
-        code: `# التعديل والإضافة والحذف في القوائم
+        code: `# List Methods : التعديل والإضافة والحذف في القوائم
 
 fruits = ["تفاح", "موز", "برتقال"]
 
-# تعديل عنصر
+# Update : تعديل عنصر
 fruits[1] = "مانجو"
 
-# إضافة عنصر في النهاية
+# append() : إضافة عنصر في النهاية
 fruits.append("عنب")
 
-# حذف عنصر
+# remove() : حذف عنصر
 fruits.remove("برتقال")
 
 print(fruits)`
@@ -432,7 +432,7 @@ print(fruits)`
         thumbnail: "https://img.youtube.com/vi/iSNRvdHiX0s/hqdefault.jpg",
         filename: "lesson_24_for_loop.py",
         infographic: "infographics/24.png",
-        code: `# الحلقة التكرارية for loop
+        code: `# for loop : الحلقة التكرارية
 
 languages = ["Python", "JavaScript", "C++", "Java"]
 
@@ -447,7 +447,7 @@ for lang in languages:
         thumbnail: "https://img.youtube.com/vi/ZhHeZ3J5hsk/hqdefault.jpg",
         filename: "lesson_25_for_loop_part2.py",
         infographic: "infographics/25.png",
-        code: `# استخدام الشروط داخل حلقة for
+        code: `# for loop + if : استخدام الشروط داخل حلقة التكرار
 
 numbers = [10, 25, 30, 45, 60]
 
@@ -463,7 +463,7 @@ for num in numbers:
         thumbnail: "https://img.youtube.com/vi/F-UgPWvXl88/hqdefault.jpg",
         filename: "lesson_26_loop_counter.py",
         infographic: "infographics/26.png",
-        code: `# إنشاء عداد وحساب مجموع عناصر القائمة
+        code: `# Counter : إنشاء عداد وحساب مجموع عناصر القائمة
 
 prices = [100, 250, 150, 300]
 total = 0
@@ -481,7 +481,7 @@ print("إجمالي المشتريات:", total)`
         thumbnail: "https://img.youtube.com/vi/1u8GJe6XonI/hqdefault.jpg",
         filename: "lesson_27_range_enumerate.py",
         infographic: "infographics/27.png",
-        code: `# استخدام range و enumerate
+        code: `# range() & enumerate() : توليد النطاقات والفهرسة التلقائية
 
 for i in range(1, 6):
     print("الرقم:", i)
@@ -498,13 +498,13 @@ for index, name in enumerate(names):
         thumbnail: "https://img.youtube.com/vi/lwx35jEhYB8/hqdefault.jpg",
         filename: "lesson_28_break_continue.py",
         infographic: "infographics/28.png",
-        code: `# التحكم في الحلقات: break و continue
+        code: `# break & continue : التحكم في الحلقات التكرارية
 
 for num in range(1, 10):
     if num == 3:
-        continue  # تخطي الرقم 3
+        continue  # continue : تخطي الدورة الحالية
     if num == 7:
-        break     # إيقاف الحلقة عند وصولها لـ 7
+        break     # break : إيقاف الحلقة تماماً
     print(num)`
     },
     {
@@ -515,7 +515,7 @@ for num in range(1, 10):
         thumbnail: "https://img.youtube.com/vi/FZBzrKLM-HQ/hqdefault.jpg",
         filename: "lesson_29_while_loop.py",
         infographic: "infographics/29.png",
-        code: `# حلقة التكرار الشرطية while loop
+        code: `# while loop : حلقة التكرار الشرطية
 
 count = 1
 
@@ -533,13 +533,13 @@ print("انتهى التكرار!")`
         thumbnail: "https://img.youtube.com/vi/zb0klVQ7EOU/hqdefault.jpg",
         filename: "lesson_30_list_comprehension.py",
         infographic: "infographics/30.png",
-        code: `# اختصار القوائم (List Comprehension)
+        code: `# List Comprehension : اختصار إنشاء القوائم
 
-# إنشاء قائمة بمربعات الأعداد من 1 إلى 5 في سطر واحد
+# Squares : إنشاء قائمة بمربعات الأعداد في سطر واحد
 squares = [x ** 2 for x in range(1, 6)]
 print(squares)  # [1, 4, 9, 16, 25]
 
-# استخراج الأعداد الزوجية فقط
+# Even numbers : استخراج الأعداد الزوجية فقط
 evens = [n for n in range(10) if n % 2 == 0]
 print(evens)`
     },
@@ -551,15 +551,15 @@ print(evens)`
         thumbnail: "https://img.youtube.com/vi/VsEWCoVG1Ag/hqdefault.jpg",
         filename: "lesson_31_identity_operators.py",
         infographic: "infographics/31.png",
-        code: `# معاملات الهوية (is / is not)
+        code: `# Identity Operators (is / is not) : معاملات الهوية
 
 list1 = [1, 2, 3]
 list2 = [1, 2, 3]
 list3 = list1
 
-print(list1 == list2)  # True (نفس القيم)
-print(list1 is list2)  # False (كائنان منفصلان في الذاكرة)
-print(list1 is list3)  # True (يشيران لنفس الموقع بالذاكرة)`
+print(list1 == list2)  # True : تساوي القيم
+print(list1 is list2)  # False : كائنان منفصلان في الذاكرة
+print(list1 is list3)  # True : نفس الموقع في الذاكرة`
     },
     {
         id: 32,
@@ -569,7 +569,7 @@ print(list1 is list3)  # True (يشيران لنفس الموقع بالذاكر
         thumbnail: "https://img.youtube.com/vi/3mwSkia8ab4/hqdefault.jpg",
         filename: "lesson_32_dictionary.py",
         infographic: "infographics/32.png",
-        code: `# القاموس في بايثون (Dictionary)
+        code: `# Dictionary : القاموس في بايثون
 
 student = {
     "name": "أحمد",
@@ -580,7 +580,7 @@ student = {
 print("اسم الطالب:", student["name"])
 print("المسار:", student.get("track"))
 
-# إضافة مفتاح جديد
+# Add key : إضافة مفتاح جديد
 student["grade"] = "امتياز"
 print(student)`
     }
