@@ -4,7 +4,7 @@
     "updatedAt": "2026-11-10T21:50:03.751Z"
   },
   "2": {
-    "code": "#_________________ Data Type : أنواع البيانات_____________\n# Strings : النصوص \n# syntax : قواعد كتابة الكود \n\n\nprint(\"Hello person\")\n\n# variables : متغيرات\n# Data = value\n\nname = \"person\"\n\n\n\nprint(name)\n\nuser = 'ahmed'\n\nprint(user)\nprint(user)\nprint(user)\nprint(user)\nprint(user)\n\n\n\n\n",
-    "updatedAt": "2026-11-11T19:12:42.938Z"
+    "code": "# Episode : الدرس 2: المتغيرات النصية (Strings) في بايثون\n# Topic : تعريف النصوص (Strings) وكيفية استخدامها.\n\n# Concept : النصوص (Strings)\n# Definition : سلسلة من الحروف أو الرموز تُستخدم لتمثيل النصوص.\n# Syntax : تُكتب النصوص داخل علامات اقتباس مفردة ('') أو مزدوجة (\"\").\n\nprint(\"Hello person\")\n# Example : طباعة نص حرفي مباشر (Literal String)\n\n# _________________________________________________\n\n# Concept : المتغيرات (Variables)\n# Definition : اسم يُستخدم لتخزين قيمة (مثل نص) في الذاكرة.\n\nname = \"person\"\n# Variable Assignment : تعيين قيمة نصية (String) للمتغير 'name'\n\nprint(name)\n# Print Variable : طباعة قيمة المتغير 'name' المخزنة\n\n# _________________________________________________\n\nuser = 'ahmed'\n# Variable Assignment : تعيين قيمة نصية أخرى للمتغير 'user' باستخدام علامات اقتباس فردية\n\nprint(user)\nprint(user)\nprint(user)\nprint(user)\nprint(user)\n# Print Repetition : تكرار طباعة قيمة المتغير 'user' عدة مرات",
+    "updatedAt": "2026-11-11T19:36:04.230Z"
   }
 }
