@@ -169,13 +169,19 @@ h1, h2, h3, h4 {
     margin-bottom: 30px;
 }
 
-.inline-hero-logo {
-    height: 32px;
-    width: auto;
-    vertical-align: middle;
-    margin: 0 4px;
-    display: inline-block;
-    object-fit: contain;
+.hero-brand-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-color);
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: 0 4px;
+}
+
+.hero-brand-inline i {
+    font-size: 1.35rem;
+    color: var(--primary-color);
 }
 
 .hero-buttons {
