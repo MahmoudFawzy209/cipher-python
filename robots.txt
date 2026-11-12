@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cipher-python.pages.dev/sitemap.xml
+Sitemap: https://shifra-python.com/sitemap.xml
+
