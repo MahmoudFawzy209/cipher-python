@@ -1252,6 +1252,52 @@ ${codeText}
 }
 
 // Admin Upload Infographic Image directly from PC
+// IndexedDB storage for large files (Infographics) without localStorage 5MB quota limit
+function openInfographicsDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open('ShefraInfographicsDB', 1);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('infographics')) {
+                db.createObjectStore('infographics', { keyPath: 'id' });
+            }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function saveInfographicToDB(lessonId, dataUrl) {
+    try {
+        const db = await openInfographicsDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('infographics', 'readwrite');
+            const store = tx.objectStore('infographics');
+            store.put({ id: String(lessonId), data: dataUrl });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+        });
+    } catch (e) {
+        return false;
+    }
+}
+
+async function getInfographicFromDB(lessonId) {
+    try {
+        const db = await openInfographicsDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction('infographics', 'readonly');
+            const store = tx.objectStore('infographics');
+            const req = store.get(String(lessonId));
+            req.onsuccess = () => resolve(req.result ? req.result.data : null);
+            req.onerror = () => resolve(null);
+        });
+    } catch (e) {
+        return null;
+    }
+}
+
+// Upload Infographic
 if (adminUploadInfographicBtn && adminInfographicFileInput) {
     adminUploadInfographicBtn.addEventListener('click', () => {
         adminInfographicFileInput.value = '';
@@ -1270,15 +1316,16 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
             const dataUrl = reader.result;
             const base64Data = dataUrl.split(',')[1];
 
-            // Save locally in browser for immediate preview/download
+            // 1. Save in IndexedDB (handles large multi-megabyte images without quota errors)
+            await saveInfographicToDB(currentLessonId, dataUrl);
+
+            // Fallback attempt to localStorage if small
             try {
                 localStorage.setItem(`cipher_infographic_${currentLessonId}`, dataUrl);
-            } catch (err) {
-                // Quota exceeded if image is very large, still push to server/GitHub
-            }
+            } catch (err) {}
 
             let uploadedRemote = false;
-            // 1. Try local server if running locally
+            // 2. Try local server if running locally
             try {
                 const localRes = await fetch('/api/upload-infographic', {
                     method: 'POST',
@@ -1288,7 +1335,7 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
                 if (localRes.ok) uploadedRemote = true;
             } catch (err) {}
 
-            // 2. Try GitHub API if token is configured
+            // 3. Try GitHub API if token is configured
             if (!uploadedRemote) {
                 try {
                     uploadedRemote = await pushFileToGitHub(
@@ -1299,7 +1346,12 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
                 } catch (err) {}
             }
 
-            adminUploadInfographicBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم رفع وحفظ الإنفوجراف!';
+            if (uploadedRemote) {
+                adminUploadInfographicBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم حفظ ونشر الإنفوجراف!';
+            } else {
+                adminUploadInfographicBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم الحفظ في المتصفح!';
+            }
+
             setTimeout(() => {
                 adminUploadInfographicBtn.innerHTML = origText;
             }, 2500);
@@ -1311,8 +1363,8 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
 // Download Infographic Image
 if (downloadInfographicBtn) {
     downloadInfographicBtn.addEventListener('click', async () => {
-        // Check if there is a newly uploaded infographic in localStorage first
-        const localDataUrl = localStorage.getItem(`cipher_infographic_${currentLessonId}`);
+        // Check IndexedDB or localStorage first
+        const localDataUrl = (await getInfographicFromDB(currentLessonId)) || localStorage.getItem(`cipher_infographic_${currentLessonId}`);
         if (localDataUrl) {
             const a = document.createElement('a');
             a.href = localDataUrl;
