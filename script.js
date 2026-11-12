@@ -606,6 +606,7 @@ const INITIAL_VISIBLE_COUNT = 3;
 // Modal Elements
 const modal = document.getElementById('lesson-modal');
 const closeModal = document.querySelector('.close-modal');
+const modalBackBtn = document.getElementById('modal-back-btn');
 const modalTitle = document.getElementById('modal-title');
 const modalDesc = document.getElementById('modal-desc');
 const modalIframe = document.getElementById('modal-iframe');
@@ -878,13 +879,13 @@ function closeLessonModal() {
 }
 
 closeModal.addEventListener('click', closeLessonModal);
+if (modalBackBtn) {
+    modalBackBtn.addEventListener('click', closeLessonModal);
+}
 
-// Close on outside click
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeLessonModal();
-    }
-});
+// Keep modal open even when clicking outside the modal box
+// (Exit is ONLY allowed by clicking the Back button or the X close icon)
+// modal.addEventListener('click', ...) was removed by request
 
 // Copy Code
 copyBtn.addEventListener('click', () => {

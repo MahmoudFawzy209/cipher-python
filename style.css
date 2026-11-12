@@ -473,19 +473,48 @@ h1, h2, h3, h4 {
     to { transform: translateY(0); opacity: 1; }
 }
 
+.modal-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.modal-back-home-btn:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    transform: translateX(-4px);
+}
+
 .close-modal {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    color: white;
-    font-size: 30px;
+    position: static;
+    color: var(--text-color);
+    font-size: 28px;
+    line-height: 1;
     font-weight: bold;
     cursor: pointer;
     transition: var(--transition);
 }
 
 .close-modal:hover {
-    color: var(--primary-color);
+    color: #ef4444;
 }
 
 .modal-grid {

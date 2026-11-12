@@ -150,7 +150,12 @@
     <!-- نافذة منبثقة (Modal) لعرض تفاصيل الدرس والكود -->
     <div id="lesson-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <div class="modal-top-bar">
+                <button type="button" id="modal-back-btn" class="modal-back-home-btn" title="العودة للصفحة الرئيسية">
+                    <i class="fa-solid fa-arrow-right"></i> العودة للصفحة الرئيسية
+                </button>
+                <span class="close-modal" title="إغلاق">&times;</span>
+            </div>
             <div class="modal-grid">
                 <div class="modal-video">
                     <h3 id="modal-title">عنوان الدرس</h3>
