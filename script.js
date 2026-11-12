@@ -823,7 +823,7 @@ function highlightAndFixComments(codeElement) {
     const commentNodes = codeElement.querySelectorAll('.token.comment');
     commentNodes.forEach(node => {
         const text = node.textContent || '';
-        const match = text.match(/^(\s*#[_\-\s←]*)(.*)$/s);
+        const match = text.match(/^(\s*#[_\-\s←→]*)(.*)$/s);
         if (!match) return;
         const prefix = match[1];
         const body = match[2];
