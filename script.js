@@ -1395,3 +1395,20 @@ if (downloadInfographicBtn) {
         }
     });
 }
+
+// Lite YouTube Player Initialization
+const heroLitePlayer = document.getElementById('hero-lite-player');
+if (heroLitePlayer) {
+    heroLitePlayer.addEventListener('click', () => {
+        const videoId = heroLitePlayer.getAttribute('data-video-id') || 'BSk-O2s09p4';
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`);
+        iframe.setAttribute('title', 'شيفرة - تعلم لغة بايثون');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.setAttribute('allowfullscreen', 'true');
+        heroLitePlayer.innerHTML = '';
+        heroLitePlayer.appendChild(iframe);
+    });
+}
