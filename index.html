@@ -351,11 +351,15 @@
 }
     </script>
 
-    <!-- خطوط جوجل وتسريع الاتصال بيوتيوب -->
+    <!-- خطوط جوجل وتسريع الاتصال الفوري بيوتيوب (Hybrid Preconnect & DNS-Prefetch) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://www.google.com">
     <link rel="preconnect" href="https://i.ytimg.com">
+    <link rel="dns-prefetch" href="https://www.youtube.com">
+    <link rel="dns-prefetch" href="https://i.ytimg.com">
+    <link rel="dns-prefetch" href="https://s.ytimg.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
@@ -561,11 +565,11 @@
         </div>
     </footer>
 
-    <!-- مكتبة PrismJS لتلوين بناء الجملة (Syntax Highlighting) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <!-- مكتبة PrismJS لتلوين بناء الجملة (Syntax Highlighting) - مؤجلة لتسريع التحميل الأولي -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <!-- ملف الجافاسكربت الخاص بنا -->
-    <script src="script.js"></script>
+    <script defer src="script.js"></script>
 </body>
 
 </html>

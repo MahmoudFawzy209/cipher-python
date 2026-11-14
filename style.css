@@ -284,6 +284,16 @@ h1, h2, h3, h4 {
     filter: drop-shadow(0 6px 25px rgba(255, 0, 0, 0.7));
 }
 
+.lite-youtube.is-loading .lite-yt-play-btn {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.95);
+    pointer-events: none;
+}
+
+.lite-youtube iframe {
+    animation: fadeIn 0.25s ease forwards;
+}
+
 /* Lessons Section */
 .section-header {
     display: flex;
