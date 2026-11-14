@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shefra-v6';
+const CACHE_NAME = 'shefra-v7';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

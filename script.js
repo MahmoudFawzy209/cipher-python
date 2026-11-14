@@ -923,6 +923,15 @@ function openModal(lesson) {
 
     modal.classList.add('show');
     document.body.style.overflow = 'hidden'; // Prevent background scroll
+
+    // Campaign Conversion Event Tracking
+    if (typeof window.trackCampaignEvent === 'function') {
+        window.trackCampaignEvent('view_lesson', {
+            lesson_id: lesson.id,
+            lesson_title: lesson.title,
+            video_id: lesson.videoId
+        });
+    }
 }
 
 // Close Modal
@@ -1535,6 +1544,10 @@ if (heroLitePlayer) {
 
     heroLitePlayer.addEventListener('click', () => {
         heroLitePlayer.classList.add('is-active');
+
+        if (typeof window.trackCampaignEvent === 'function') {
+            window.trackCampaignEvent('play_hero_video', { video_id: videoId });
+        }
 
         if (ghostIframe && isGhostLoaded) {
             // Instant zero-delay start via postMessage API

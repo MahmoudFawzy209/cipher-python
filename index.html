@@ -25,6 +25,23 @@
     <meta name="twitter:description" content="شروحات بايثون مبسطة وعميقة مع الأكواد البرمجية وملخصات الإنفوجراف القابلة للتحميل.">
     <meta name="twitter:image" content="https://shifra-python.com/logo.png">
 
+    <!-- Google Analytics & Campaign Conversion Tracking (جاهز لتسجيل إحصائيات حملتك الإعلانية) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRACKING_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      const savedGaId = localStorage.getItem('cipher_ga_id') || 'G-TRACKING_ID';
+      gtag('config', savedGaId, { 'send_page_view': true });
+      window.trackCampaignEvent = function(name, params) {
+        try {
+          if (typeof gtag === 'function') {
+            gtag('event', name, params || {});
+          }
+        } catch(e) {}
+      };
+    </script>
+
     <!-- Structured Data (Schema.org) for Google Search & Ads Quality Score -->
         <script type="application/ld+json">
 {
