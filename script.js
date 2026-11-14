@@ -1477,7 +1477,7 @@ if (downloadInfographicBtn) {
 // Ghost Pre-buffering YouTube Player (Zero-Latency Instant Start)
 const heroLitePlayer = document.getElementById('hero-lite-player');
 if (heroLitePlayer) {
-    const videoId = heroLitePlayer.getAttribute('data-video-id') || 'BSk-O2s09p4';
+    const videoId = heroLitePlayer.getAttribute('data-video-id') || 'yPfdOEcOVS4';
     let ghostIframe = null;
     let isGhostLoaded = false;
 
