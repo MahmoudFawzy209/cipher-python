@@ -763,6 +763,23 @@ function renderLessons(lessonsToRender, isSearching = false) {
             </div>
         `;
 
+        // Predictive Pre-warming: prepare YouTube connection & poster 200-400ms before user clicks!
+        const prewarmThisLesson = () => {
+            if (modalIframe && modalIframe.parentElement) {
+                modalIframe.parentElement.style.backgroundImage = `url(${lesson.thumbnail})`;
+                modalIframe.parentElement.style.backgroundSize = 'cover';
+                modalIframe.parentElement.style.backgroundPosition = 'center';
+            }
+            // Pre-connect to this specific video embed
+            const link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = `https://www.youtube.com/embed/${lesson.videoId}`;
+            document.head.appendChild(link);
+        };
+
+        card.addEventListener('pointerenter', prewarmThisLesson, { once: true });
+        card.addEventListener('touchstart', prewarmThisLesson, { once: true, passive: true });
+
         // Add click event to open modal
         card.addEventListener('click', () => openModal(lesson));
 
@@ -849,8 +866,16 @@ function highlightAndFixComments(codeElement) {
 function openModal(lesson) {
     modalTitle.textContent = lesson.title;
     modalDesc.textContent = lesson.description;
-    // No autoplay=1 so YouTube counts organic user-initiated views
-    modalIframe.src = `https://www.youtube.com/embed/${lesson.videoId}?rel=0`;
+
+    // Instant Visual Poster: show crisp lesson thumbnail instantly behind iframe
+    if (modalIframe && modalIframe.parentElement) {
+        modalIframe.parentElement.style.backgroundImage = `url(${lesson.thumbnail})`;
+        modalIframe.parentElement.style.backgroundSize = 'cover';
+        modalIframe.parentElement.style.backgroundPosition = 'center';
+    }
+
+    // Instant Playback on explicit user click
+    modalIframe.src = `https://www.youtube.com/embed/${lesson.videoId}?autoplay=1&enablejsapi=1&rel=0`;
     modalFilename.textContent = lesson.filename;
 
     currentLessonCode = lesson.code;
@@ -881,6 +906,9 @@ function closeLessonModal() {
     resetEditorMode();
     modal.classList.remove('show');
     modalIframe.src = ''; // Stop video when closed
+    if (modalIframe && modalIframe.parentElement) {
+        modalIframe.parentElement.style.backgroundImage = 'none';
+    }
     document.body.style.overflow = 'auto'; // Restore background scroll
 
     try {
@@ -1498,4 +1526,15 @@ if (heroLitePlayer) {
             ghostIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0`;
         }
     });
+
+    // Predictive Pre-warm Lesson 1 during idle time (the most visited lesson)
+    setTimeout(() => {
+        const lesson1 = lessons.find(l => l.id === 1);
+        if (lesson1) {
+            const link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = `https://www.youtube.com/embed/${lesson1.videoId}`;
+            document.head.appendChild(link);
+        }
+    }, 2000);
 }
