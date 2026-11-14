@@ -363,6 +363,34 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
+
+    <!-- Critical Inline CSS: رسم الواجهة فوراً حتى على شبكات 3G والهواتف الضعيفة دون انتظار أي ملف خارجي -->
+    <style>
+        body.dark-theme {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: rgba(11, 15, 25, 0.95);
+            min-height: 70px;
+        }
+        .hero {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #000;
+        }
+    </style>
     <!-- أيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- مكتبة PrismJS لتلوين الكود (ثيم Tomorrow Night المشابه للوضع الليلي) -->
@@ -570,6 +598,14 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <!-- ملف الجافاسكربت الخاص بنا -->
     <script defer src="script.js"></script>
+    <!-- تسجيل الـ Service Worker للتحميل اللحظي حتى بدون إنترنت -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
 </body>
 
 </html>

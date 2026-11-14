@@ -290,6 +290,32 @@ h1, h2, h3, h4 {
     pointer-events: none;
 }
 
+/* Ghost Iframe (Pre-buffered in background, instant zero-ms activation on click) */
+.lite-youtube .ghost-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.25s ease;
+}
+
+.lite-youtube.is-active .ghost-iframe {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 5;
+}
+
+.lite-youtube.is-active .lite-yt-thumb,
+.lite-youtube.is-active .lite-yt-play-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
 .lite-youtube iframe {
     animation: fadeIn 0.25s ease forwards;
 }

@@ -1396,47 +1396,56 @@ if (downloadInfographicBtn) {
     });
 }
 
-// Hybrid Lite YouTube Player with Smart Pre-warming (0.05s Load + Instant Playback)
+// Ghost Pre-buffering YouTube Player (Zero-Latency Instant Start)
 const heroLitePlayer = document.getElementById('hero-lite-player');
 if (heroLitePlayer) {
-    let isWarmedUp = false;
-    const warmUpYouTube = () => {
-        if (isWarmedUp) return;
-        isWarmedUp = true;
-        // Inject background preconnect links to warm up TCP/TLS sockets silently
-        ['https://www.youtube.com', 'https://googleads.g.doubleclick.net', 'https://static.doubleclick.net'].forEach(origin => {
-            const link = document.createElement('link');
-            link.rel = 'preconnect';
-            link.href = origin;
-            document.head.appendChild(link);
-        });
+    const videoId = heroLitePlayer.getAttribute('data-video-id') || 'BSk-O2s09p4';
+    let ghostIframe = null;
+    let isGhostLoaded = false;
+
+    // Silent background pre-buffering while visitor reads the title & intro
+    const initGhostIframe = () => {
+        if (ghostIframe) return;
+        ghostIframe = document.createElement('iframe');
+        ghostIframe.className = 'ghost-iframe';
+        ghostIframe.setAttribute('src', `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0`);
+        ghostIframe.setAttribute('title', 'شيفرة - تعلم لغة بايثون');
+        ghostIframe.setAttribute('frameborder', '0');
+        ghostIframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        ghostIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        ghostIframe.setAttribute('allowfullscreen', 'true');
+        ghostIframe.onload = () => {
+            isGhostLoaded = true;
+        };
+        heroLitePlayer.appendChild(ghostIframe);
     };
 
-    // 1. Pre-warm on mouse hover or touch start
-    heroLitePlayer.addEventListener('pointerenter', warmUpYouTube, { once: true });
-    heroLitePlayer.addEventListener('touchstart', warmUpYouTube, { once: true, passive: true });
-
-    // 2. Pre-warm silently during browser idle time after 1.5s
+    // Start silent pre-buffering 600ms after initial render
     if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => setTimeout(warmUpYouTube, 1500));
+        requestIdleCallback(() => setTimeout(initGhostIframe, 600));
     } else {
-        setTimeout(warmUpYouTube, 2000);
+        setTimeout(initGhostIframe, 800);
     }
 
+    // Also trigger immediately if user moves mouse near the video area before timer
+    heroLitePlayer.addEventListener('pointerenter', initGhostIframe, { once: true });
+    heroLitePlayer.addEventListener('touchstart', initGhostIframe, { once: true, passive: true });
+
     heroLitePlayer.addEventListener('click', () => {
-        heroLitePlayer.classList.add('is-loading');
-        const videoId = heroLitePlayer.getAttribute('data-video-id') || 'BSk-O2s09p4';
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('src', `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`);
-        iframe.setAttribute('title', 'شيفرة - تعلم لغة بايثون');
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-        iframe.setAttribute('allowfullscreen', 'true');
-        iframe.onload = () => {
-            heroLitePlayer.classList.remove('is-loading');
-        };
-        heroLitePlayer.innerHTML = '';
-        heroLitePlayer.appendChild(iframe);
+        heroLitePlayer.classList.add('is-active');
+
+        if (ghostIframe && isGhostLoaded) {
+            // Instant zero-delay start via postMessage API
+            try {
+                ghostIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            } catch (e) {}
+        } else if (ghostIframe) {
+            // If still loading, force autoplay URL
+            ghostIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0`;
+        } else {
+            // Fallback
+            initGhostIframe();
+            ghostIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0`;
+        }
     });
 }
