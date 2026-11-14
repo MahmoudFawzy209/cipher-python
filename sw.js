@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shefra-v2';
+const CACHE_NAME = 'shefra-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,10 +10,11 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -21,29 +22,47 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Network-First with Cache Fallback for instant loads
+// True Network-First for HTML navigation so updates appear immediately!
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   
-  // Ignore external API or YouTube embeds from SW caching
   if (e.request.url.includes('youtube.com') || e.request.url.includes('api.github.com')) {
     return;
   }
 
+  // HTML page requests: Network-First
+  if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(e.request) || caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Static assets: Stale-While-Revalidate
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       const fetchPromise = fetch(e.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseToCache);
-          });
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
         }
         return networkResponse;
       }).catch(() => cachedResponse);
@@ -52,4 +71,3 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
-
