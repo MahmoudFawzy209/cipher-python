@@ -898,8 +898,8 @@ function openModal(lesson) {
         modalIframe.parentElement.style.backgroundPosition = 'center';
     }
 
-    // Instant Playback on explicit user click
-    modalIframe.src = `https://www.youtube.com/embed/${lesson.videoId}?autoplay=1&enablejsapi=1&rel=0`;
+    // لا يتم التشغيل التلقائي إطلاقاً إلا بضغط الزائر لضمان احتساب يوتيوب للمشاهدة الحقيقية
+    modalIframe.src = `https://www.youtube.com/embed/${lesson.videoId}?autoplay=0&enablejsapi=1&rel=0`;
     modalFilename.textContent = lesson.filename;
 
     currentLessonCode = lesson.code;
