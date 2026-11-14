@@ -23,39 +23,332 @@
     <meta name="twitter:image" content="https://shifra-python.com/logo.png">
 
     <!-- Structured Data (Schema.org) for Google Search & Ads Quality Score -->
-    <script type="application/ld+json">
+        <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
     {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebSite",
-          "name": "شيفرة | تعلم بايثون باحترافية",
-          "url": "https://shifra-python.com/",
-          "description": "منصة وقناة شيفرة لتعليم لغة البرمجة بايثون من الصفر للاحتراف",
-          "inLanguage": "ar"
-        },
-        {
-          "@type": "Course",
-          "name": "دورة تعلم لغة بايثون (Python) من الصفر للاحتراف",
-          "description": "دورة شاملة ومجانية مكونة من 32 حلقة لتعلم أساسيات واحتراف لغة البرمجة بايثون مع الأكواد التطبيقية.",
-          "provider": {
-            "@type": "Organization",
-            "name": "قناة شيفرة",
-            "sameAs": "https://www.youtube.com/@Coding-w8y"
-          },
-          "inLanguage": "ar",
-          "isAccessibleForFree": true
-        },
-        {
-          "@type": "VideoObject",
-          "name": "لماذا تتعلم لغة بايثون؟ | قناة شيفرة",
-          "description": "مقدمة شاملة حول أهمية تعلم البرمجة بلغة Python وكيف تبدأ رحلتك البرمجية مع قناة شيفرة.",
-          "thumbnailUrl": "https://img.youtube.com/vi/BSk-O2s09p4/maxresdefault.jpg",
-          "uploadDate": "2026-01-01T00:00:00Z",
-          "embedUrl": "https://www.youtube.com/embed/BSk-O2s09p4"
-        }
-      ]
+      "@type": "WebSite",
+      "name": "شيفرة | تعلم بايثون باحترافية",
+      "url": "https://shifra-python.com/",
+      "description": "منصة وقناة شيفرة لتعليم لغة البرمجة بايثون من الصفر للاحتراف",
+      "inLanguage": "ar"
+    },
+    {
+      "@type": "Course",
+      "name": "دورة تعلم لغة بايثون (Python) من الصفر للاحتراف",
+      "description": "دورة شاملة ومجانية مكونة من 32 حلقة لتعلم أساسيات واحتراف لغة البرمجة بايثون مع الأكواد التطبيقية.",
+      "provider": {
+        "@type": "Organization",
+        "name": "قناة شيفرة",
+        "sameAs": "https://www.youtube.com/@Coding-w8y"
+      },
+      "inLanguage": "ar",
+      "isAccessibleForFree": true,
+      "hasCourseInstance": {
+        "@type": "CourseInstance",
+        "courseMode": "Online"
+      }
+    },
+    {
+      "@type": "VideoObject",
+      "name": "لماذا تتعلم لغة بايثون؟ | قناة شيفرة",
+      "description": "مقدمة شاملة حول أهمية تعلم البرمجة بلغة Python وكيف تبدأ رحلتك البرمجية مع قناة شيفرة.",
+      "thumbnailUrl": "https://img.youtube.com/vi/BSk-O2s09p4/maxresdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/BSk-O2s09p4",
+      "contentUrl": "https://www.youtube.com/watch?v=BSk-O2s09p4"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 1: تجهيز محرر الأكواد | طباعة أول سطر كود 🔥 | قناة شيفرة",
+      "description": "في هذا الدرس الأول، نتعرف على كيفية تثبيت لغة بايثون وتجهيز محرر الأكواد VS Code وكتابة أول سطر برمجي باستخدام دالة الطباعة print.",
+      "thumbnailUrl": "https://img.youtube.com/vi/UEPBHsuZZSU/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/UEPBHsuZZSU",
+      "contentUrl": "https://www.youtube.com/watch?v=UEPBHsuZZSU"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 2: المتغيرات النصية في لغة بايثون (النصوص Strings) | قناة شيفرة",
+      "description": "سنتعرف على البيانات النصية (Strings) وكيفية تخزينها في متغير (Variable)، قواعد تسمية المتغيرات، والفرق بين SyntaxError و NameError.",
+      "thumbnailUrl": "https://img.youtube.com/vi/-GM2v-oXxPw/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/-GM2v-oXxPw",
+      "contentUrl": "https://www.youtube.com/watch?v=-GM2v-oXxPw"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 3: أنواع المتغيرات الرقمية | الأعداد الصحيحة (Integers) | قناة شيفرة",
+      "description": "نتعرف في هذا الدرس على المتغيرات الرقمية من نوع الأعداد الصحيحة (int)، وكيفية تعريفها وتخزين الأرقام الصحيحة وإجراء العمليات الأساسية عليها.",
+      "thumbnailUrl": "https://img.youtube.com/vi/yNL7sYqWFrE/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/yNL7sYqWFrE",
+      "contentUrl": "https://www.youtube.com/watch?v=yNL7sYqWFrE"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 4: أنواع المتغيرات الرقمية | الأعداد العشرية (Float) | قناة شيفرة",
+      "description": "شرح المتغيرات الرقمية من نوع الأعداد العشرية (float) وكيفية التعامل مع الأرقام التي تحتوي على فاصلة عشرية في لغة بايثون.",
+      "thumbnailUrl": "https://img.youtube.com/vi/B7OVzgOyCQo/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/B7OVzgOyCQo",
+      "contentUrl": "https://www.youtube.com/watch?v=B7OVzgOyCQo"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 5: العمليات الحسابية في لغة بايثون (Mathematics) | قناة شيفرة",
+      "description": "كيفية إجراء العمليات الحسابية الأساسية في بايثون مثل الجمع، الطرح، الضرب، القسمة، الأسس، وباقي القسمة.",
+      "thumbnailUrl": "https://img.youtube.com/vi/b0J0ZOc8WME/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/b0J0ZOc8WME",
+      "contentUrl": "https://www.youtube.com/watch?v=b0J0ZOc8WME"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 6: منطق وترتيب العمليات الحسابية | Arithmetic Logic | قناة شيفرة",
+      "description": "فهم أولويات وترتيب تنفيذ العمليات الحسابية في بايثون (الأقواس، الأسس، الضرب والقسمة، ثم الجمع والطرح).",
+      "thumbnailUrl": "https://img.youtube.com/vi/0crdxnvPvXk/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/0crdxnvPvXk",
+      "contentUrl": "https://www.youtube.com/watch?v=0crdxnvPvXk"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 7: الدمج والإضافة في بايثون | Addition & Concatenation | قناة شيفرة",
+      "description": "الفرق الجوهري بين عملية الجمع الرياضي للأرقام (Addition) وعملية دمج النصوص معاً (Concatenation) وتجنب خطأ TypeError.",
+      "thumbnailUrl": "https://img.youtube.com/vi/6QN_F80XRvk/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/6QN_F80XRvk",
+      "contentUrl": "https://www.youtube.com/watch?v=6QN_F80XRvk"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 8: تحويل أنواع البيانات في بايثون | Data Casting | قناة شيفرة",
+      "description": "شرح تفصيلي لتحويل أنواع البيانات (Type Conversion) باستخدام دوال int() و float() و str() لتجنب أخطاء العمليات الحسابية.",
+      "thumbnailUrl": "https://img.youtube.com/vi/OsB4LssMzzQ/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/OsB4LssMzzQ",
+      "contentUrl": "https://www.youtube.com/watch?v=OsB4LssMzzQ"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 9: دالة ()input في بايثون: كيف تجعل برنامجك يتفاعل مع المستخدم؟ 🔥 | قناة شيفرة",
+      "description": "تعلم كيفية جعل البرنامج يسأل المستخدم ويستقبل منه البيانات باستخدام دالة الإدخال input() وكتابة أول برنامج تفاعلي.",
+      "thumbnailUrl": "https://img.youtube.com/vi/jm6cInUaxzA/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/jm6cInUaxzA",
+      "contentUrl": "https://www.youtube.com/watch?v=jm6cInUaxzA"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 10: تحويل مُدخلات المستخدم إلى أعداد صحيحة بدون Error | قناة شيفرة",
+      "description": "كيفية استخدام دالة int() مع دالة input() لاستقبال أرقام من المستخدم وبناء برنامج عملي يحسب العمر أو سنة الميلاد.",
+      "thumbnailUrl": "https://img.youtube.com/vi/ir8T4j0ig0M/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/ir8T4j0ig0M",
+      "contentUrl": "https://www.youtube.com/watch?v=ir8T4j0ig0M"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 11: تحويل البيانات الرقمية بدالة input | (الجزء الثالث) | قناة شيفرة",
+      "description": "تطبيقات متقدمة على دالة الإدخال input() مع الأعداد الصحيحة والعشرية لإجراء عمليات حسابية متكاملة من مدخلات المستخدم.",
+      "thumbnailUrl": "https://img.youtube.com/vi/qgxRxU-HrAA/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/qgxRxU-HrAA",
+      "contentUrl": "https://www.youtube.com/watch?v=qgxRxU-HrAA"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 12: معامِلات المقارنة في بايثون | Comparison Operators | قناة شيفرة",
+      "description": "التعرف على معاملات المقارنة (==, !=, >, <, >=, <=) وكيف تعيد قيماً منطقية (True أو False) تمهيداً للجمل الشرطية.",
+      "thumbnailUrl": "https://img.youtube.com/vi/_vMV2WhYqHE/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/_vMV2WhYqHE",
+      "contentUrl": "https://www.youtube.com/watch?v=_vMV2WhYqHE"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 13: شرح الجملة الشرطية في بايثون | if condition | قناة شيفرة",
+      "description": "تعلم كيف تجعل برنامجك يفكر ويتخذ قرارات بناءً على شروط معينة باستخدام جملة if الشرطية وأهمية المسافة البادئة.",
+      "thumbnailUrl": "https://img.youtube.com/vi/4t-HxWv789w/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/4t-HxWv789w",
+      "contentUrl": "https://www.youtube.com/watch?v=4t-HxWv789w"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 14: الجملة الشرطية في بايثون | elif & else | قناة شيفرة",
+      "description": "توسيع القرارات الشرطية باستخدام elif لاختبار شروط متعددة و else لتنفيذ كود بديل عند عدم تحقق أي شرط.",
+      "thumbnailUrl": "https://img.youtube.com/vi/zAjB2Gjg2aU/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/zAjB2Gjg2aU",
+      "contentUrl": "https://www.youtube.com/watch?v=zAjB2Gjg2aU"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 15: شرح المُعامِلات المنطقية في بايثون | and .. or | قناة شيفرة",
+      "description": "كيفية ربط أكثر من شرط في جملة واحدة باستخدام المعاملات المنطقية and (تحقق كل الشروط) و or (تحقق شرط واحد على الأقل).",
+      "thumbnailUrl": "https://img.youtube.com/vi/UoxH4-0pT14/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/UoxH4-0pT14",
+      "contentUrl": "https://www.youtube.com/watch?v=UoxH4-0pT14"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 16: المُعامِلات المنطقية or .. and في بايثون (الجزء الثاني) | قناة شيفرة",
+      "description": "تطبيقات وأمثلة عملية متقدمة على دمج الشروط باستخدام and و or لبناء منطق برمجي قوي ودقيق.",
+      "thumbnailUrl": "https://img.youtube.com/vi/vtD2NBwNDRI/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/vtD2NBwNDRI",
+      "contentUrl": "https://www.youtube.com/watch?v=vtD2NBwNDRI"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 17: كيفية التحقق من وجود بيانات مُخزَّنة في الذاكرة؟ | قناة شيفرة",
+      "description": "فهم القيم المنطقية للبيانات الفارغة والممتلئة (Truthy & Falsy values) وكيفية التحقق من أن المستخدم أدخل بيانات فعلية.",
+      "thumbnailUrl": "https://img.youtube.com/vi/yW4Wt5bZobo/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/yW4Wt5bZobo",
+      "contentUrl": "https://www.youtube.com/watch?v=yW4Wt5bZobo"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 18: الفهرسة في لغة بايثون | Indexing and Slicing | قناة شيفرة",
+      "description": "الوصول إلى الأحرف والعناصر الفردية عن طريق رقم الفهرس (Index) واقتطاع أجزاء من النصوص باستخدام (Slicing).",
+      "thumbnailUrl": "https://img.youtube.com/vi/EdytFzRKZXU/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/EdytFzRKZXU",
+      "contentUrl": "https://www.youtube.com/watch?v=EdytFzRKZXU"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 19: مُعامِل العضوية في بايثون | Membership Operator | قناة شيفرة",
+      "description": "استخدام معامل العضوية (in و not in) للبحث والتحقق من وجود نص أو عنصر داخل سلسلة نصية أو قائمة.",
+      "thumbnailUrl": "https://img.youtube.com/vi/imqNpvR8Hpw/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/imqNpvR8Hpw",
+      "contentUrl": "https://www.youtube.com/watch?v=imqNpvR8Hpw"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 20: تنسيق النصوص في لغة بايثون | f-string والـ Escape Characters | قناة شيفرة",
+      "description": "الطريقة الحديثة والاحترافية لدمج المتغيرات داخل النصوص باستخدام f-string، مع شرح رموز الهروب مثل \\\\n و \\\\t.",
+      "thumbnailUrl": "https://img.youtube.com/vi/NhhITKWKByA/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/NhhITKWKByA",
+      "contentUrl": "https://www.youtube.com/watch?v=NhhITKWKByA"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 21: تنسيق مخرجات الكود والأرقام العشرية باستخدام الـ f-string (الجزء 2) | قناة شيفرة",
+      "description": "مهارات متقدمة في تنسيق الأرقام العشرية وتحديد عدد الخانات بعد الفاصلة وفواصل الآلاف باستخدام f-string.",
+      "thumbnailUrl": "https://img.youtube.com/vi/nzb7RjdQ5GI/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/nzb7RjdQ5GI",
+      "contentUrl": "https://www.youtube.com/watch?v=nzb7RjdQ5GI"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 22: هياكل البيانات في لغة بايثون | القوائم (Lists) | قناة شيفرة",
+      "description": "مدخل إلى هياكل البيانات وشرح القوائم (Lists) لتخزين مجموعة من العناصر في متغير واحد والوصول إليها بالفهرس.",
+      "thumbnailUrl": "https://img.youtube.com/vi/sRptdlu4XSo/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/sRptdlu4XSo",
+      "contentUrl": "https://www.youtube.com/watch?v=sRptdlu4XSo"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 23: قوائم البيانات Lists (الجزء الثاني) | التعديل، الدمج، والحذف | قناة شيفرة",
+      "description": "العمليات الأساسية على القوائم: تعديل العناصر، الإضافة بـ append و insert، والحذف بـ remove و pop.",
+      "thumbnailUrl": "https://img.youtube.com/vi/MbMnAWRD_c4/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/MbMnAWRD_c4",
+      "contentUrl": "https://www.youtube.com/watch?v=MbMnAWRD_c4"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 24: الحلقة التكرارية في بايثون | for loop | قناة شيفرة",
+      "description": "شرح مفهوم التكرار في البرمجة وكيفية استخدام حلقة for loop للمرور على عناصر القائمة أو النص وتنفيذ الأوامر.",
+      "thumbnailUrl": "https://img.youtube.com/vi/iSNRvdHiX0s/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/iSNRvdHiX0s",
+      "contentUrl": "https://www.youtube.com/watch?v=iSNRvdHiX0s"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 25: الحلقة التكرارية في بايثون (الجزء الثاني) | for loop | قناة شيفرة",
+      "description": "تطبيقات عملية وتمارين إضافية على استخدام الحلقات التكرارية for loop مع الشروط والقوائم.",
+      "thumbnailUrl": "https://img.youtube.com/vi/ZhHeZ3J5hsk/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/ZhHeZ3J5hsk",
+      "contentUrl": "https://www.youtube.com/watch?v=ZhHeZ3J5hsk"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 26: طريقة تحديث المتغيرات وإنشاء عداد بالـ for loop في بايثون | قناة شيفرة",
+      "description": "كيفية إنشاء متغير عداد (Counter) أو جامع تراكمي وتحديث قيمته في كل دورة داخل حلقة for.",
+      "thumbnailUrl": "https://img.youtube.com/vi/F-UgPWvXl88/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/F-UgPWvXl88",
+      "contentUrl": "https://www.youtube.com/watch?v=F-UgPWvXl88"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 27: دالة Range مقابل Enumerate | تعديل عناصر القائمة | قناة شيفرة",
+      "description": "الفرق بين دالة range() لتوليد نطاق أرقام ودالة enumerate() للحصول على الفهرس والعنصر معاً لتعديل القائمة.",
+      "thumbnailUrl": "https://img.youtube.com/vi/1u8GJe6XonI/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/1u8GJe6XonI",
+      "contentUrl": "https://www.youtube.com/watch?v=1u8GJe6XonI"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 28: التحكم في تنفيذ الكود | break & continue | قناة شيفرة",
+      "description": "كيفية إيقاف الحلقة التكرارية بالكامل باستخدام break أو تخطي الدورة الحالية فقط باستخدام continue.",
+      "thumbnailUrl": "https://img.youtube.com/vi/lwx35jEhYB8/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/lwx35jEhYB8",
+      "contentUrl": "https://www.youtube.com/watch?v=lwx35jEhYB8"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 29: شرح الـ while loop في بايثون | قناة شيفرة",
+      "description": "التعرف على حلقة التكرار الشرطية while loop التي تستمر في العمل طالما أن الشرط صحيح، وكيفية إيقافها.",
+      "thumbnailUrl": "https://img.youtube.com/vi/FZBzrKLM-HQ/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/FZBzrKLM-HQ",
+      "contentUrl": "https://www.youtube.com/watch?v=FZBzrKLM-HQ"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 30: شرح الـ List Comprehension في بايثون | قناة شيفرة",
+      "description": "اختصار إنشاء القوائم وتطبيق الحلقات والشروط في سطر برمجي واحد أنيق وسريع باستخدام List Comprehension.",
+      "thumbnailUrl": "https://img.youtube.com/vi/zb0klVQ7EOU/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/zb0klVQ7EOU",
+      "contentUrl": "https://www.youtube.com/watch?v=zb0klVQ7EOU"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 31: مُعامِل الهوية في بايثون | Identity Operators | قناة شيفرة",
+      "description": "فهم معامل الهوية (is و is not) والفرق بين تساوي القيم (==) وتطابق موقع الكائن في الذاكرة (is).",
+      "thumbnailUrl": "https://img.youtube.com/vi/VsEWCoVG1Ag/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/VsEWCoVG1Ag",
+      "contentUrl": "https://www.youtube.com/watch?v=VsEWCoVG1Ag"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "الدرس 32: تعلم القاموس في بايثون | Dictionary in Python | قناة شيفرة",
+      "description": "شرح هياكل بيانات القواميس (Dictionaries) لتخزين البيانات على هيئة مفتاح وقيمة (Key-Value Pairs) والوصول السريع إليها.",
+      "thumbnailUrl": "https://img.youtube.com/vi/3mwSkia8ab4/hqdefault.jpg",
+      "uploadDate": "2026-01-01T00:00:00Z",
+      "embedUrl": "https://www.youtube.com/embed/3mwSkia8ab4",
+      "contentUrl": "https://www.youtube.com/watch?v=3mwSkia8ab4"
     }
+  ]
+}
     </script>
 
     <!-- خطوط جوجل وتسريع الاتصال بيوتيوب -->
