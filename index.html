@@ -378,28 +378,34 @@
     <!-- Critical Inline CSS: رسم الواجهة فوراً حتى على شبكات 3G والهواتف الضعيفة دون انتظار أي ملف خارجي -->
     <style>
         body.dark-theme {
-            background-color: #0b0f19;
+            background-color: #08090d;
             color: #f1f5f9;
             font-family: 'Cairo', system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
         }
         .navbar {
-            background-color: rgba(11, 15, 25, 0.95);
+            background-color: rgba(8, 9, 13, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             min-height: 70px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
         }
         .hero {
             min-height: 85vh;
             display: flex;
             align-items: center;
+            position: relative;
         }
         .video-wrapper {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             background-color: #000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65), 0 0 30px rgba(37, 99, 235, 0.25);
+            border: 1px solid rgba(59, 130, 246, 0.35);
         }
     </style>
     <!-- أيقونات FontAwesome -->

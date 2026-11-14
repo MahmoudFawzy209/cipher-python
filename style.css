@@ -16,16 +16,17 @@
     --transition: all 0.3s ease;
 }
 
-/* Dark Theme Variables */
+/* Dark Theme Variables (مستوحى من واجهة الذكاء الاصطناعي الحديثة Deep/Kling) */
 body.dark-theme {
-    --bg-color: #0f172a;
-    --nav-bg: #0f172a;
-    --text-color: #f8fafc;
+    --bg-color: #08090d; /* Deep obsidian black */
+    --nav-bg: rgba(8, 9, 13, 0.88);
+    --text-color: #f1f5f9;
     --text-muted: #94a3b8;
-    --card-bg: #1e293b;
-    --border-color: #334155;
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-    --editor-header: #2d2d2d;
+    --card-bg: rgba(14, 17, 27, 0.72);
+    --border-color: rgba(59, 130, 246, 0.22);
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    --editor-header: #121624;
+    --editor-bg: #090b14;
 }
 
 /* Reset & Global */
@@ -131,27 +132,59 @@ h1, h2, h3, h4 {
 }
 
 .theme-btn {
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-size: 1.2rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(20, 28, 48, 0.55);
+    border: 1px solid rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.4), inset 0 0 8px rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    font-size: 1.15rem;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: var(--transition);
 }
 
 .theme-btn:hover {
-    color: var(--primary-color);
+    background: rgba(30, 48, 86, 0.85);
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 28px rgba(59, 130, 246, 0.75), inset 0 0 12px rgba(59, 130, 246, 0.35);
+    transform: scale(1.05);
 }
 
 /* Hero Section */
 .hero {
+    position: relative;
     margin-top: var(--header-height);
-    padding: 45px 0 25px;
+    padding: 55px 0 35px;
     display: flex;
     align-items: center;
+    overflow: hidden;
+}
+
+/* الجزء المضيء بالأعلى تماماً كما في واجهة الذكاء الاصطناعي بين الرأس وقسم تعلم لغة بايثون */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1050px, 98vw);
+    height: 520px;
+    background: radial-gradient(ellipse 65% 55% at 50% 20%, rgba(37, 99, 235, 0.45) 0%, rgba(30, 58, 138, 0.22) 45%, rgba(8, 9, 13, 0) 75%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(32px);
 }
 
 .hero-content {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
@@ -190,9 +223,9 @@ h1, h2, h3, h4 {
 }
 
 .btn {
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 12px 26px;
+    border-radius: 12px;
+    font-weight: 700;
     font-size: 1rem;
     display: inline-flex;
     align-items: center;
@@ -200,27 +233,39 @@ h1, h2, h3, h4 {
     cursor: pointer;
     transition: var(--transition);
     border: none;
+    text-decoration: none;
 }
 
 .btn-primary {
-    background-color: #ef4444; /* YouTube Red */
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
     color: white;
+    border: 1px solid rgba(239, 68, 68, 0.8);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.45), inset 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: #dc2626;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    border-color: #fca5a5;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.75), inset 0 0 12px rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+    color: white;
 }
 
+/* توهج زر علامة الإضافة المقتبس من واجهة الذكاء الاصطناعي أقصى اليسار */
 .btn-secondary {
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
+    background: rgba(20, 28, 48, 0.55);
+    color: #ffffff;
+    border: 1px solid rgba(59, 130, 246, 0.75);
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.42), inset 0 0 8px rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: rgba(30, 48, 86, 0.85);
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.75), inset 0 0 14px rgba(59, 130, 246, 0.35);
     transform: translateY(-2px);
 }
 
@@ -228,10 +273,10 @@ h1, h2, h3, h4 {
     position: relative;
     padding-bottom: 56.25%; /* 16:9 aspect ratio */
     height: 0;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65), 0 0 30px rgba(37, 99, 235, 0.25);
+    border: 1px solid rgba(59, 130, 246, 0.35);
 }
 
 .video-wrapper iframe {
@@ -351,20 +396,25 @@ h1, h2, h3, h4 {
 
 .search-box input {
     width: 100%;
-    padding: 12px 40px 12px 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
+    padding: 12px 42px 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.65);
+    background-color: rgba(16, 20, 31, 0.7);
     color: var(--text-color);
     font-size: 1rem;
     font-family: 'Cairo', sans-serif;
     outline: none;
-    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.35), inset 0 0 8px rgba(59, 130, 246, 0.15);
+    transition: all 0.3s ease;
 }
 
-.search-box input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.search-box input:focus,
+.search-box input:hover {
+    border-color: #60a5fa;
+    background-color: rgba(22, 30, 48, 0.85);
+    box-shadow: 0 0 26px rgba(59, 130, 246, 0.65), inset 0 0 12px rgba(59, 130, 246, 0.28);
 }
 
 .lessons-grid {
@@ -393,22 +443,26 @@ h1, h2, h3, h4 {
     width: 100%;
     max-width: 480px;
     padding: 16px 28px;
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    border: 2px solid var(--primary-color);
+    background: rgba(20, 28, 48, 0.6);
+    color: #ffffff;
+    border: 1px solid rgba(59, 130, 246, 0.75);
     border-radius: 14px;
     font-family: 'Cairo', sans-serif;
     font-size: 1.15rem;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: var(--shadow);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: var(--transition);
 }
 
 .show-more-btn:hover {
-    background-color: var(--primary-color);
+    background: rgba(30, 48, 86, 0.85);
+    border-color: #60a5fa;
     color: #ffffff;
-    transform: translateY(3px);
+    box-shadow: 0 0 32px rgba(59, 130, 246, 0.75), inset 0 0 15px rgba(59, 130, 246, 0.35);
+    transform: translateY(-2px);
 }
 
 .wide-arrow-down {
@@ -435,10 +489,12 @@ h1, h2, h3, h4 {
 
 .lesson-card {
     background-color: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: var(--transition);
     cursor: pointer;
     display: flex;
@@ -447,7 +503,8 @@ h1, h2, h3, h4 {
 
 .lesson-card:hover {
     transform: translateY(-5px);
-    border-color: var(--primary-color);
+    border-color: rgba(96, 165, 250, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 22px rgba(59, 130, 246, 0.35);
 }
 
 .lesson-thumb {
@@ -538,15 +595,17 @@ h1, h2, h3, h4 {
 }
 
 .modal-content {
-    background-color: var(--bg-color);
+    background-color: rgba(12, 15, 25, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     width: 95%;
     max-width: 1200px;
     height: 90vh;
-    border-radius: 12px;
+    border-radius: 16px;
     position: relative;
     padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(37, 99, 235, 0.25);
     display: flex;
     flex-direction: column;
     animation: modalSlideUp 0.15s ease;
@@ -563,27 +622,33 @@ h1, h2, h3, h4 {
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .modal-back-home-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: none;
-    border: none;
-    color: var(--primary-color);
+    background: rgba(20, 28, 48, 0.6);
+    border: 1px solid rgba(59, 130, 246, 0.7);
+    color: #60a5fa;
     font-family: 'Cairo', sans-serif;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.35), inset 0 0 8px rgba(59, 130, 246, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-back-home-btn:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background: rgba(30, 48, 86, 0.85);
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 26px rgba(59, 130, 246, 0.65), inset 0 0 12px rgba(59, 130, 246, 0.3);
     transform: translateX(-4px);
 }
 
@@ -668,32 +733,38 @@ h1, h2, h3, h4 {
     flex-direction: column;
     flex-grow: 1;
     background-color: var(--editor-bg);
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #333;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .infographic-download-btn {
     width: 100%;
-    padding: 11px 18px;
-    border-radius: 8px;
-    background-color: var(--primary-color);
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(20, 28, 48, 0.65);
     color: #ffffff;
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
     font-size: 0.95rem;
-    border: none;
+    border: 1px solid rgba(59, 130, 246, 0.75);
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.4), inset 0 0 8px rgba(59, 130, 246, 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: var(--transition);
     flex-shrink: 0;
 }
 
 .infographic-download-btn:hover {
-    background-color: var(--primary-hover);
+    background: rgba(30, 48, 86, 0.9);
+    border-color: #60a5fa;
+    box-shadow: 0 0 28px rgba(59, 130, 246, 0.75), inset 0 0 14px rgba(59, 130, 246, 0.35);
     transform: translateY(-2px);
 }
 
