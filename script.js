@@ -866,6 +866,12 @@ function openModal(lesson) {
     // Trigger PrismJS syntax highlighting and Bidi comment fix
     highlightAndFixComments(modalCode);
 
+    // Deep linking & Dynamic Canonical URLs for SEO and shareability
+    try {
+        history.pushState(null, '', `#lesson-${lesson.id}`);
+        document.title = `${lesson.title} | قناة شيفرة لتعلم بايثون`;
+    } catch (e) {}
+
     modal.classList.add('show');
     document.body.style.overflow = 'hidden'; // Prevent background scroll
 }
@@ -876,7 +882,27 @@ function closeLessonModal() {
     modal.classList.remove('show');
     modalIframe.src = ''; // Stop video when closed
     document.body.style.overflow = 'auto'; // Restore background scroll
+
+    try {
+        history.pushState(null, '', window.location.pathname + window.location.search);
+        document.title = 'شيفرة | تعلم بايثون باحترافية من الصفر إلى الاحتراف';
+    } catch (e) {}
 }
+
+// Check URL Hash on load or change (e.g. #lesson-3)
+function checkUrlHashForLesson() {
+    const hash = window.location.hash;
+    const match = hash.match(/^#lesson-(\d+)$/);
+    if (match) {
+        const lessonId = parseInt(match[1], 10);
+        const targetLesson = lessons.find(l => l.id === lessonId);
+        if (targetLesson) {
+            openModal(targetLesson);
+        }
+    }
+}
+window.addEventListener('hashchange', checkUrlHashForLesson);
+checkUrlHashForLesson();
 
 closeModal.addEventListener('click', closeLessonModal);
 if (modalBackBtn) {
@@ -1360,6 +1386,24 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
     });
 }
 
+// Run Code Online in Cloud Sandbox
+const runCodeOnlineBtn = document.getElementById('run-code-online-btn');
+if (runCodeOnlineBtn) {
+    runCodeOnlineBtn.addEventListener('click', () => {
+        const codeToRun = currentLessonCode || '';
+        navigator.clipboard.writeText(codeToRun).then(() => {
+            const origHtml = runCodeOnlineBtn.innerHTML;
+            runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ! جاري الفتح...';
+            setTimeout(() => {
+                runCodeOnlineBtn.innerHTML = origHtml;
+            }, 2500);
+            window.open('https://www.programiz.com/python-programming/online-compiler/', '_blank');
+        }).catch(() => {
+            window.open('https://www.programiz.com/python-programming/online-compiler/', '_blank');
+        });
+    });
+}
+
 // Download Infographic Image
 if (downloadInfographicBtn) {
     downloadInfographicBtn.addEventListener('click', async () => {
@@ -1376,7 +1420,13 @@ if (downloadInfographicBtn) {
         }
 
         try {
-            const response = await fetch(currentLessonInfographic + '?t=' + Date.now());
+            // Prefer lightweight WebP (280KB) or fallback to PNG (2.4MB)
+            let response = await fetch(`infographics/${currentLessonId}.webp?t=` + Date.now());
+            let fileExt = 'webp';
+            if (!response.ok) {
+                response = await fetch(currentLessonInfographic + '?t=' + Date.now());
+                fileExt = 'png';
+            }
             if (!response.ok) {
                 alert('لم يتم رفع ورقة إنفوجراف لهذه الحلقة بعد.');
                 return;
@@ -1385,7 +1435,7 @@ if (downloadInfographicBtn) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `shefra-lesson-${currentLessonId}-infographic.png`;
+            a.download = `shefra-lesson-${currentLessonId}-infographic.${fileExt}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

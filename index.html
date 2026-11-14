@@ -10,6 +10,8 @@
     <meta name="author" content="قناة شيفرة - Cipher Python">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/png" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b0f19">
 
     <!-- Open Graph / Social Media / Google Ads Preview -->
     <meta property="og:type" content="website">
@@ -405,7 +407,10 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="logo">
-                <img src="logo.png" alt="شيفرة" class="logo-img">
+                <picture>
+                    <source srcset="logo.webp" type="image/webp">
+                    <img src="logo.png" alt="شيفرة" class="logo-img" width="120" height="46">
+                </picture>
             </a>
             <ul class="nav-links">
                 <li><a href="#home" class="active">الرئيسية</a></li>
@@ -517,6 +522,9 @@
                                 </button>
                                 <button id="download-code-btn" class="icon-btn" title="تحميل الملف">
                                     <i class="fa-solid fa-download"></i>
+                                </button>
+                                <button id="run-code-online-btn" class="icon-btn run-code-btn" title="تشغيل الكود أونلاين">
+                                    <i class="fa-solid fa-play"></i> تشغيل الكود
                                 </button>
                             </div>
                         </div>

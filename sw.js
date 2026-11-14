@@ -1,10 +1,12 @@
-const CACHE_NAME = 'shefra-v1';
+const CACHE_NAME = 'shefra-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  '/logo.png'
+  '/logo.png',
+  '/logo.webp',
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -50,3 +52,4 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+

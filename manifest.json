@@ -1,0 +1,16 @@
+{
+  "name": "شيفرة - تعلم بايثون",
+  "short_name": "شيفرة",
+  "description": "منصة وقناة شيفرة لتعليم لغة بايثون من الصفر للاحتراف",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}

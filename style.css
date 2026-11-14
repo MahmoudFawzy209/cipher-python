@@ -736,6 +736,26 @@ body.dark-theme .editor-header {
     color: var(--primary-color);
 }
 
+.run-code-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff !important;
+    border: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 5px 12px;
+    border-radius: 6px;
+    gap: 6px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.run-code-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+}
+
 .editor-body {
     flex-grow: 1;
     overflow: auto;
