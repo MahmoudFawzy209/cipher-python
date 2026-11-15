@@ -1064,11 +1064,8 @@ if (adminLockBtn && adminSettingsModal) {
         adminSettingsModal.classList.remove('show');
     });
 
-    adminSettingsModal.addEventListener('click', (e) => {
-        if (e.target === adminSettingsModal) {
-            adminSettingsModal.classList.remove('show');
-        }
-    });
+    // Keep admin modal open when clicking outside - close ONLY via X icon
+    // adminSettingsModal click-outside removed
 
     saveAdminSettingsBtn.addEventListener('click', () => {
         const enabled = adminModeCheckbox.checked;
@@ -1642,6 +1639,7 @@ const sandboxModal = document.getElementById('sandbox-modal');
 const openSandboxHeroBtn = document.getElementById('open-sandbox-hero-btn');
 const navSandboxLink = document.getElementById('nav-sandbox-link');
 const closeSandboxModalBtn = document.getElementById('close-sandbox-modal');
+const sandboxBackBtn = document.getElementById('sandbox-back-btn');
 const sandboxCodeEditor = document.getElementById('sandbox-code-editor');
 const sandboxTerminalOutput = document.getElementById('sandbox-terminal-output');
 const sandboxRunBtn = document.getElementById('sandbox-run-btn');
@@ -1670,12 +1668,10 @@ function closeSandboxModal() {
 if (openSandboxHeroBtn) openSandboxHeroBtn.addEventListener('click', openSandboxModal);
 if (navSandboxLink) navSandboxLink.addEventListener('click', (e) => { e.preventDefault(); openSandboxModal(); });
 if (closeSandboxModalBtn) closeSandboxModalBtn.addEventListener('click', closeSandboxModal);
+if (sandboxBackBtn) sandboxBackBtn.addEventListener('click', closeSandboxModal);
 
-if (sandboxModal) {
-    sandboxModal.addEventListener('click', (e) => {
-        if (e.target === sandboxModal) closeSandboxModal();
-    });
-}
+// Keep modal open even when clicking outside the modal box
+// (Exit is ONLY allowed by clicking the Back to Home button or the X close icon)
 
 if (clearSandboxOutputBtn && sandboxTerminalOutput) {
     clearSandboxOutputBtn.addEventListener('click', () => {
