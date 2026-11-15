@@ -1463,27 +1463,33 @@ let isSkulptLoading = false;
 let skulptLoadPromise = null;
 
 function ensureSkulptLoaded() {
-    if (window.Sk) return Promise.resolve();
+    if (window.Sk && window.Sk.builtinFiles) return Promise.resolve();
     if (skulptLoadPromise) return skulptLoadPromise;
 
     isSkulptLoading = true;
     skulptLoadPromise = new Promise((resolve, reject) => {
-        const s1 = document.createElement('script');
-        s1.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js';
-        s1.async = true;
-        s1.onload = () => {
-            const s2 = document.createElement('script');
-            s2.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js';
-            s2.async = true;
-            s2.onload = () => {
+        const loadScript = (src) => {
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = false;
+                s.onload = res;
+                s.onerror = rej;
+                document.head.appendChild(s);
+            });
+        };
+
+        loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js')
+            .then(() => loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js'))
+            .then(() => {
                 isSkulptLoading = false;
                 resolve();
-            };
-            s2.onerror = reject;
-            document.head.appendChild(s2);
-        };
-        s1.onerror = reject;
-        document.head.appendChild(s1);
+            })
+            .catch((err) => {
+                isSkulptLoading = false;
+                skulptLoadPromise = null;
+                reject(err);
+            });
     });
     return skulptLoadPromise;
 }
