@@ -1458,6 +1458,7 @@ const terminalOutput = document.getElementById('terminal-output');
 const clearTerminalBtn = document.getElementById('clear-terminal-btn');
 const closeTerminalBtn = document.getElementById('close-terminal-btn');
 const runCodeOnlineBtn = document.getElementById('run-code-online-btn');
+const terminalExecTime = document.getElementById('terminal-exec-time');
 
 let isSkulptLoading = false;
 let skulptLoadPromise = null;
@@ -1505,9 +1506,53 @@ window.addEventListener('load', () => {
     }, 3000);
 });
 
+// ميزة سحب شاشة مخرجات بايثون للأعلى والأسفل بحرية تامة
+const terminalResizer = document.getElementById('terminal-resizer');
+if (terminalResizer && codeTerminal) {
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    const onPointerDown = (e) => {
+        isDragging = true;
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        startHeight = codeTerminal.offsetHeight;
+        terminalResizer.classList.add('is-dragging');
+        document.body.style.userSelect = 'none';
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('touchmove', onPointerMove, { passive: false });
+        document.addEventListener('touchend', onPointerUp);
+    };
+
+    const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const currentY = e.clientY || (e.touches && e.touches[0].clientY);
+        const deltaY = startY - currentY;
+        const newHeight = Math.max(90, Math.min(window.innerHeight * 0.75, startHeight + deltaY));
+        codeTerminal.style.height = `${newHeight}px`;
+        if (e.cancelable) e.preventDefault();
+    };
+
+    const onPointerUp = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        terminalResizer.classList.remove('is-dragging');
+        document.body.style.userSelect = '';
+        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerup', onPointerUp);
+        document.removeEventListener('touchmove', onPointerMove);
+        document.removeEventListener('touchend', onPointerUp);
+    };
+
+    terminalResizer.addEventListener('pointerdown', onPointerDown);
+    terminalResizer.addEventListener('touchstart', onPointerDown, { passive: false });
+}
+
 if (clearTerminalBtn && terminalOutput) {
     clearTerminalBtn.addEventListener('click', () => {
         terminalOutput.innerHTML = '';
+        if (terminalExecTime) terminalExecTime.classList.add('hidden');
     });
 }
 
@@ -1526,6 +1571,7 @@ if (runCodeOnlineBtn) {
         if (terminalOutput) {
             terminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل كود بايثون...</span>';
         }
+        if (terminalExecTime) terminalExecTime.classList.add('hidden');
 
         const btnOrigHtml = runCodeOnlineBtn.innerHTML;
         runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التنفيذ...';
@@ -1566,11 +1612,11 @@ if (runCodeOnlineBtn) {
             });
             const duration = ((performance.now() - startTime) / 1000).toFixed(2);
 
-            const successSpan = document.createElement('span');
-            successSpan.className = 'term-success';
-            successSpan.textContent = `✔ تم تنفيذ الكود بنجاح في ${duration} ثانية`;
-            terminalOutput.appendChild(successSpan);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            // عرض وقت التنفيذ بأناقة في شريط الأدوات بدلاً من تشويه المخرجات
+            if (terminalExecTime) {
+                terminalExecTime.innerHTML = `⏱️ ${duration}s`;
+                terminalExecTime.classList.remove('hidden');
+            }
 
             if (typeof window.trackCampaignEvent === 'function') {
                 window.trackCampaignEvent('run_python_code', { lesson_id: currentLessonId });
@@ -1585,6 +1631,145 @@ if (runCodeOnlineBtn) {
             }
         } finally {
             runCodeOnlineBtn.innerHTML = btnOrigHtml;
+        }
+    });
+}
+
+// ========================================================
+// مختبر بايثون التفاعلي الحر (Python Sandbox Modal)
+// ========================================================
+const sandboxModal = document.getElementById('sandbox-modal');
+const openSandboxHeroBtn = document.getElementById('open-sandbox-hero-btn');
+const navSandboxLink = document.getElementById('nav-sandbox-link');
+const closeSandboxModalBtn = document.getElementById('close-sandbox-modal');
+const sandboxCodeEditor = document.getElementById('sandbox-code-editor');
+const sandboxTerminalOutput = document.getElementById('sandbox-terminal-output');
+const sandboxRunBtn = document.getElementById('sandbox-run-btn');
+const sandboxCopyBtn = document.getElementById('sandbox-copy-btn');
+const sandboxDownloadBtn = document.getElementById('sandbox-download-btn');
+const sandboxClearBtn = document.getElementById('sandbox-clear-btn');
+const clearSandboxOutputBtn = document.getElementById('clear-sandbox-output-btn');
+const sandboxExecTime = document.getElementById('sandbox-exec-time');
+
+function openSandboxModal() {
+    if (sandboxModal) {
+        sandboxModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        ensureSkulptLoaded().catch(() => {});
+        if (sandboxCodeEditor) sandboxCodeEditor.focus();
+    }
+}
+
+function closeSandboxModal() {
+    if (sandboxModal) {
+        sandboxModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+if (openSandboxHeroBtn) openSandboxHeroBtn.addEventListener('click', openSandboxModal);
+if (navSandboxLink) navSandboxLink.addEventListener('click', (e) => { e.preventDefault(); openSandboxModal(); });
+if (closeSandboxModalBtn) closeSandboxModalBtn.addEventListener('click', closeSandboxModal);
+
+if (sandboxModal) {
+    sandboxModal.addEventListener('click', (e) => {
+        if (e.target === sandboxModal) closeSandboxModal();
+    });
+}
+
+if (clearSandboxOutputBtn && sandboxTerminalOutput) {
+    clearSandboxOutputBtn.addEventListener('click', () => {
+        sandboxTerminalOutput.innerHTML = '<span class="term-placeholder">تم مسح المخرجات. اضغط على تشغيل الكود للبدء من جديد...</span>';
+        if (sandboxExecTime) sandboxExecTime.classList.add('hidden');
+    });
+}
+
+if (sandboxClearBtn && sandboxCodeEditor) {
+    sandboxClearBtn.addEventListener('click', () => {
+        sandboxCodeEditor.value = '';
+        sandboxCodeEditor.focus();
+    });
+}
+
+if (sandboxCopyBtn && sandboxCodeEditor) {
+    sandboxCopyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(sandboxCodeEditor.value).then(() => {
+            const orig = sandboxCopyBtn.innerHTML;
+            sandboxCopyBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ!';
+            setTimeout(() => sandboxCopyBtn.innerHTML = orig, 2000);
+        });
+    });
+}
+
+if (sandboxDownloadBtn && sandboxCodeEditor) {
+    sandboxDownloadBtn.addEventListener('click', () => {
+        const blob = new Blob([sandboxCodeEditor.value], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'main.py';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+}
+
+// تشغيل الكود في مختبر بايثون
+if (sandboxRunBtn && sandboxCodeEditor && sandboxTerminalOutput) {
+    sandboxRunBtn.addEventListener('click', async () => {
+        const code = sandboxCodeEditor.value || '';
+        if (!code.trim()) return;
+
+        sandboxTerminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل الكود...</span>';
+        if (sandboxExecTime) sandboxExecTime.classList.add('hidden');
+
+        const origHtml = sandboxRunBtn.innerHTML;
+        sandboxRunBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التشغيل...';
+
+        try {
+            await ensureSkulptLoaded();
+            sandboxTerminalOutput.innerHTML = '';
+
+            const outf = (t) => {
+                sandboxTerminalOutput.appendChild(document.createTextNode(t));
+                sandboxTerminalOutput.scrollTop = sandboxTerminalOutput.scrollHeight;
+            };
+
+            const builtinRead = (x) => {
+                if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined) {
+                    throw "ملف غير موجود: '" + x + "'";
+                }
+                return window.Sk.builtinFiles["files"][x];
+            };
+
+            window.Sk.configure({
+                output: outf,
+                read: builtinRead,
+                inputfun: (p) => {
+                    return new Promise((res) => {
+                        const v = window.prompt(p || 'أدخل قيمة input():');
+                        res(v || '');
+                    });
+                },
+                inputfunTakesPrompt: true
+            });
+
+            const t0 = performance.now();
+            await window.Sk.misceval.asyncToPromise(() => {
+                return window.Sk.importMainWithBody("<stdin>", false, code, true);
+            });
+            const dur = ((performance.now() - t0) / 1000).toFixed(2);
+
+            if (sandboxExecTime) {
+                sandboxExecTime.innerHTML = `⏱️ ${dur}s`;
+                sandboxExecTime.classList.remove('hidden');
+            }
+        } catch (err) {
+            const errSpan = document.createElement('span');
+            errSpan.className = 'term-error';
+            errSpan.textContent = `❌ ${err.toString()}`;
+            sandboxTerminalOutput.appendChild(errSpan);
+        } finally {
+            sandboxRunBtn.innerHTML = origHtml;
         }
     });
 }

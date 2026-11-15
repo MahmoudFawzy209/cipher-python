@@ -447,6 +447,7 @@
             <ul class="nav-links">
                 <li><a href="#home" class="active">الرئيسية</a></li>
                 <li><a href="#lessons">الدروس والحلقات</a></li>
+                <li><a href="#sandbox" id="nav-sandbox-link" class="nav-sandbox-link"><i class="fa-solid fa-code"></i> محرر بايثون</a></li>
             </ul>
             <button id="theme-toggle" class="theme-btn" aria-label="تبديل المظهر">
                 <i class="fa-solid fa-sun"></i>
@@ -467,6 +468,9 @@
                     <a href="#lessons" class="btn btn-secondary">
                         <i class="fa-solid fa-play"></i> تصفح الدروس
                     </a>
+                    <button type="button" id="open-sandbox-hero-btn" class="btn btn-sandbox" title="فتح محرر بايثون التفاعلي الحر">
+                        <i class="fa-solid fa-code"></i> جرب محرر بايثون ⚡
+                    </button>
                 </div>
             </div>
             <div class="hero-video fade-in-left">
@@ -564,11 +568,15 @@
                             <pre id="modal-pre"><code id="modal-code" class="language-python"></code></pre>
                             <textarea id="admin-code-textarea" class="admin-code-textarea hidden" spellcheck="false" placeholder="# اكتب كود بايثون هنا..."></textarea>
                         </div>
-                        <!-- شاشة تشغيل مخرجات بايثون المدمجة فائقة السرعة -->
+                        <!-- شاشة تشغيل مخرجات بايثون المدمجة فائقة السرعة مع إمكانية السحب للأعلى -->
                         <div id="code-terminal" class="code-terminal hidden">
+                            <div class="terminal-resizer" id="terminal-resizer" title="اسحب للأعلى أو للأسفل لتغيير حجم الشاشة">
+                                <span class="resizer-bar"></span>
+                            </div>
                             <div class="terminal-header">
                                 <span class="terminal-title"><i class="fa-solid fa-terminal"></i> مخرجات الكود (Python Output)</span>
                                 <div class="terminal-actions">
+                                    <span id="terminal-exec-time" class="exec-time-badge hidden"></span>
                                     <button type="button" id="clear-terminal-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
                                     <button type="button" id="close-terminal-btn" class="terminal-btn" title="إغلاق الشاشة"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
@@ -591,6 +599,62 @@
                     <button id="download-infographic-btn" class="infographic-download-btn" title="تنزيل مذكرة إنفوجراف تلخيص الحلقة">
                         <i class="fa-solid fa-file-arrow-down"></i> تنزيل مذكرة إنفوجراف تلخيص الحلقة
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة محرر بايثون التفاعلي الحر (Python Playground Modal) -->
+    <div id="sandbox-modal" class="modal">
+        <div class="modal-content sandbox-modal-content">
+            <div class="modal-top-bar">
+                <div class="sandbox-header-info">
+                    <span class="sandbox-title"><i class="fa-solid fa-code"></i> محرر بايثون التفاعلي | Python Playground</span>
+                    <span id="sandbox-exec-time" class="exec-time-badge hidden"></span>
+                </div>
+                <div class="sandbox-header-actions">
+                    <button type="button" id="sandbox-run-btn" class="run-code-btn" title="تشغيل الكود">
+                        <i class="fa-solid fa-play"></i> تشغيل الكود
+                    </button>
+                    <button type="button" id="sandbox-copy-btn" class="terminal-btn" title="نسخ الكود">
+                        <i class="fa-regular fa-copy"></i> نسخ
+                    </button>
+                    <button type="button" id="sandbox-download-btn" class="terminal-btn" title="تحميل ملف بايثون">
+                        <i class="fa-solid fa-download"></i> تحميل .py
+                    </button>
+                    <button type="button" id="sandbox-clear-btn" class="terminal-btn" title="مسح الكود">
+                        <i class="fa-solid fa-eraser"></i> مسح
+                    </button>
+                    <span id="close-sandbox-modal" class="close-modal" title="إغلاق">&times;</span>
+                </div>
+            </div>
+            <div class="sandbox-grid">
+                <!-- المربع الأول: كتابة وتعديل الكود -->
+                <div class="sandbox-panel sandbox-editor-panel">
+                    <div class="panel-header">
+                        <span><i class="fa-brands fa-python"></i> كود بايثون (main.py)</span>
+                        <span class="panel-hint">اكتب أو عدل الكود هنا</span>
+                    </div>
+                    <textarea id="sandbox-code-editor" class="sandbox-textarea" spellcheck="false" placeholder="# اكتب أو ألصق كود بايثون هنا...&#10;name = 'شيفرة'&#10;print('مرحباً بك في منصة', name)"># محرر بايثون التفاعلي - منصة شيفرة
+# اكتب وجرب أي كود بايثون تريده هنا مباشرة
+
+name = "شيفرة"
+print("مرحباً بك في منصة", name)
+
+# تجربة حلقة تكرارية
+for i in range(1, 4):
+    print(f"السطر البرمجي رقم: {i}")</textarea>
+                </div>
+
+                <!-- المربع الثاني: شاشة مخرجات الكود -->
+                <div class="sandbox-panel sandbox-output-panel">
+                    <div class="panel-header">
+                        <span><i class="fa-solid fa-terminal"></i> مخرجات الكود (Terminal Output)</span>
+                        <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
+                    </div>
+                    <div id="sandbox-terminal-output" class="sandbox-output">
+                        <span class="term-placeholder">⚡ اضغط على زر (تشغيل الكود) بالأعلى لتشغيل برنامجك ومشاهدة المخرجات هنا مباشرة...</span>
+                    </div>
                 </div>
             </div>
         </div>
