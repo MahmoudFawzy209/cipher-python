@@ -564,6 +564,17 @@
                             <pre id="modal-pre"><code id="modal-code" class="language-python"></code></pre>
                             <textarea id="admin-code-textarea" class="admin-code-textarea hidden" spellcheck="false" placeholder="# اكتب كود بايثون هنا..."></textarea>
                         </div>
+                        <!-- شاشة تشغيل مخرجات بايثون المدمجة فائقة السرعة -->
+                        <div id="code-terminal" class="code-terminal hidden">
+                            <div class="terminal-header">
+                                <span class="terminal-title"><i class="fa-solid fa-terminal"></i> مخرجات الكود (Python Output)</span>
+                                <div class="terminal-actions">
+                                    <button type="button" id="clear-terminal-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
+                                    <button type="button" id="close-terminal-btn" class="terminal-btn" title="إغلاق الشاشة"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+                            <div id="terminal-output" class="terminal-output"></div>
+                        </div>
                     </div>
 
                     <!-- أزرار الأدمن الخاصة بالإنفوجراف (تظهر للأدمن فقط دون المساس بهيكلة الموقع) -->

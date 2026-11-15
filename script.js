@@ -937,6 +937,8 @@ function openModal(lesson) {
 // Close Modal
 function closeLessonModal() {
     resetEditorMode();
+    if (codeTerminal) codeTerminal.classList.add('hidden');
+    if (terminalOutput) terminalOutput.innerHTML = '';
     modal.classList.remove('show');
     modalIframe.src = ''; // Stop video when closed
     if (modalIframe && modalIframe.parentElement) {
@@ -1447,21 +1449,137 @@ if (adminUploadInfographicBtn && adminInfographicFileInput) {
     });
 }
 
-// Run Code Online in Cloud Sandbox
+// ========================================================
+// محرك بايثون الخفيف المدمج (Lite In-Page Python Runner)
+// تحميل متأخر في الخلفية دون أي تأثير على سرعة فتح الموقع
+// ========================================================
+const codeTerminal = document.getElementById('code-terminal');
+const terminalOutput = document.getElementById('terminal-output');
+const clearTerminalBtn = document.getElementById('clear-terminal-btn');
+const closeTerminalBtn = document.getElementById('close-terminal-btn');
 const runCodeOnlineBtn = document.getElementById('run-code-online-btn');
+
+let isSkulptLoading = false;
+let skulptLoadPromise = null;
+
+function ensureSkulptLoaded() {
+    if (window.Sk) return Promise.resolve();
+    if (skulptLoadPromise) return skulptLoadPromise;
+
+    isSkulptLoading = true;
+    skulptLoadPromise = new Promise((resolve, reject) => {
+        const s1 = document.createElement('script');
+        s1.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js';
+        s1.async = true;
+        s1.onload = () => {
+            const s2 = document.createElement('script');
+            s2.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js';
+            s2.async = true;
+            s2.onload = () => {
+                isSkulptLoading = false;
+                resolve();
+            };
+            s2.onerror = reject;
+            document.head.appendChild(s2);
+        };
+        s1.onerror = reject;
+        document.head.appendChild(s1);
+    });
+    return skulptLoadPromise;
+}
+
+// تحميل هادئ بعد اكتمال تحميل الموقع بـ 3 ثوانٍ أثناء خمول المتصفح
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => ensureSkulptLoaded().catch(() => {}));
+        } else {
+            ensureSkulptLoaded().catch(() => {});
+        }
+    }, 3000);
+});
+
+if (clearTerminalBtn && terminalOutput) {
+    clearTerminalBtn.addEventListener('click', () => {
+        terminalOutput.innerHTML = '';
+    });
+}
+
+if (closeTerminalBtn && codeTerminal) {
+    closeTerminalBtn.addEventListener('click', () => {
+        codeTerminal.classList.add('hidden');
+    });
+}
+
 if (runCodeOnlineBtn) {
-    runCodeOnlineBtn.addEventListener('click', () => {
+    runCodeOnlineBtn.addEventListener('click', async () => {
         const codeToRun = currentLessonCode || '';
-        navigator.clipboard.writeText(codeToRun).then(() => {
-            const origHtml = runCodeOnlineBtn.innerHTML;
-            runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ! جاري الفتح...';
-            setTimeout(() => {
-                runCodeOnlineBtn.innerHTML = origHtml;
-            }, 2500);
-            window.open('https://www.programiz.com/python-programming/online-compiler/', '_blank');
-        }).catch(() => {
-            window.open('https://www.programiz.com/python-programming/online-compiler/', '_blank');
-        });
+        if (!codeToRun.trim()) return;
+
+        if (codeTerminal) codeTerminal.classList.remove('hidden');
+        if (terminalOutput) {
+            terminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل كود بايثون...</span>';
+        }
+
+        const btnOrigHtml = runCodeOnlineBtn.innerHTML;
+        runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التنفيذ...';
+
+        try {
+            await ensureSkulptLoaded();
+
+            if (!terminalOutput) return;
+            terminalOutput.innerHTML = '';
+
+            const outf = (text) => {
+                terminalOutput.appendChild(document.createTextNode(text));
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            };
+
+            const builtinRead = (x) => {
+                if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined) {
+                    throw "ملف غير موجود: '" + x + "'";
+                }
+                return window.Sk.builtinFiles["files"][x];
+            };
+
+            window.Sk.configure({
+                output: outf,
+                read: builtinRead,
+                inputfun: (promptText) => {
+                    return new Promise((resolve) => {
+                        const val = window.prompt(promptText || 'أدخل قيمة الإدخال input():');
+                        resolve(val || '');
+                    });
+                },
+                inputfunTakesPrompt: true
+            });
+
+            const startTime = performance.now();
+            await window.Sk.misceval.asyncToPromise(() => {
+                return window.Sk.importMainWithBody("<stdin>", false, codeToRun, true);
+            });
+            const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+
+            const successSpan = document.createElement('span');
+            successSpan.className = 'term-success';
+            successSpan.textContent = `✔ تم تنفيذ الكود بنجاح في ${duration} ثانية`;
+            terminalOutput.appendChild(successSpan);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+            if (typeof window.trackCampaignEvent === 'function') {
+                window.trackCampaignEvent('run_python_code', { lesson_id: currentLessonId });
+            }
+        } catch (err) {
+            if (terminalOutput) {
+                const errSpan = document.createElement('span');
+                errSpan.className = 'term-error';
+                errSpan.textContent = `❌ ${err.toString()}`;
+                terminalOutput.appendChild(errSpan);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+        } finally {
+            runCodeOnlineBtn.innerHTML = btnOrigHtml;
+        }
     });
 }
 

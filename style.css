@@ -878,6 +878,107 @@ body.dark-theme .editor-header {
     background: #4f4f4f;
 }
 
+/* مظهر شاشة مخرجات بايثون المدمجة فائقة السرعة */
+.code-terminal {
+    background-color: #06070a;
+    border-top: 1px solid rgba(59, 130, 246, 0.35);
+    display: flex;
+    flex-direction: column;
+    max-height: 190px;
+    min-height: 120px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88rem;
+    transition: all 0.25s ease;
+}
+
+.code-terminal.hidden {
+    display: none !important;
+}
+
+.terminal-header {
+    background: rgba(16, 20, 32, 0.95);
+    padding: 6px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.terminal-title {
+    color: #60a5fa;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cairo', sans-serif;
+}
+
+.terminal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.terminal-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: 'Cairo', sans-serif;
+    padding: 3px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.terminal-btn:hover {
+    color: #ffffff;
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #60a5fa;
+}
+
+.terminal-output {
+    padding: 10px 14px;
+    overflow-y: auto;
+    color: #e2e8f0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex-grow: 1;
+    direction: ltr;
+    text-align: left;
+}
+
+.terminal-output .term-success {
+    color: #10b981;
+    font-weight: 600;
+    margin-top: 6px;
+    display: block;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+
+.terminal-output .term-error {
+    color: #ef4444;
+    font-weight: 600;
+    margin-top: 6px;
+    display: block;
+}
+
+.terminal-output .term-info {
+    color: #60a5fa;
+    margin-bottom: 4px;
+    display: block;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+
 /* Override Prism background to fit VS Code style */
 pre[class*="language-"] {
     margin: 0;
