@@ -241,26 +241,21 @@ h1, h2, h3, h4 {
 
 .hero-buttons {
     display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .btn {
-    padding: 9px 20px;
-    border-radius: 10px;
+    padding: 12px 26px;
+    border-radius: 12px;
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 1rem;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
     cursor: pointer;
     transition: var(--transition);
     border: none;
     text-decoration: none;
-    white-space: nowrap;
-    line-height: 1.4;
 }
 
 .btn-primary {
@@ -1127,22 +1122,100 @@ body.dark-theme .editor-header {
     font-weight: 400;
 }
 
-.sandbox-textarea {
+.sandbox-editor-wrapper {
+    position: relative;
     flex-grow: 1;
     width: 100%;
-    background: transparent;
-    color: #f8fafc;
-    border: none;
-    padding: 16px;
+    height: 100%;
+    overflow: hidden;
+    background: #1e1e1e;
+}
+
+.sandbox-pre {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 16px !important;
+    box-sizing: border-box;
     font-family: 'Fira Code', monospace;
     font-size: 0.95rem;
     line-height: 1.6;
-    resize: none;
-    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    tab-size: 4;
+    overflow: hidden;
+    pointer-events: none;
+    background: transparent !important;
+    border: none !important;
     direction: ltr;
     text-align: left;
-    white-space: pre;
+}
+
+.sandbox-pre code {
+    background: transparent !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    padding: 0 !important;
+}
+
+.sandbox-textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
     tab-size: 4;
+    overflow: auto;
+    background: transparent;
+    color: transparent;
+    caret-color: #38bdf8;
+    border: none;
+    outline: none;
+    resize: none;
+    direction: ltr;
+    text-align: left;
+}
+
+/* ألوان بايثون الحقيقية كما في محرر VS Code Dark+ */
+.sandbox-editor-wrapper .token.keyword {
+    color: #c586c0 !important;
+}
+.sandbox-editor-wrapper .token.builtin,
+.sandbox-editor-wrapper .token.function {
+    color: #dcdcaa !important;
+}
+.sandbox-editor-wrapper .token.string {
+    color: #ce9178 !important;
+}
+.sandbox-editor-wrapper .token.comment {
+    color: #6a9955 !important;
+}
+.sandbox-editor-wrapper .token.number {
+    color: #b5cea8 !important;
+}
+.sandbox-editor-wrapper .token.operator {
+    color: #d4d4d4 !important;
+}
+.sandbox-editor-wrapper .token.punctuation {
+    color: #ffd700 !important;
 }
 
 .sandbox-output {

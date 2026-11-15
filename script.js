@@ -1641,6 +1641,8 @@ const navSandboxLink = document.getElementById('nav-sandbox-link');
 const closeSandboxModalBtn = document.getElementById('close-sandbox-modal');
 const sandboxBackBtn = document.getElementById('sandbox-back-btn');
 const sandboxCodeEditor = document.getElementById('sandbox-code-editor');
+const sandboxPre = document.getElementById('sandbox-pre');
+const sandboxHighlightedCode = document.getElementById('sandbox-highlighted-code');
 const sandboxTerminalOutput = document.getElementById('sandbox-terminal-output');
 const sandboxRunBtn = document.getElementById('sandbox-run-btn');
 const sandboxCopyBtn = document.getElementById('sandbox-copy-btn');
@@ -1649,11 +1651,43 @@ const sandboxClearBtn = document.getElementById('sandbox-clear-btn');
 const clearSandboxOutputBtn = document.getElementById('clear-sandbox-output-btn');
 const sandboxExecTime = document.getElementById('sandbox-exec-time');
 
+function updateSandboxHighlight() {
+    if (!sandboxCodeEditor || !sandboxHighlightedCode) return;
+    let code = sandboxCodeEditor.value || '';
+    if (code.endsWith('\n')) code += ' ';
+    sandboxHighlightedCode.textContent = code;
+    if (window.Prism) {
+        Prism.highlightElement(sandboxHighlightedCode);
+    }
+}
+
+if (sandboxCodeEditor) {
+    sandboxCodeEditor.addEventListener('input', updateSandboxHighlight);
+    sandboxCodeEditor.addEventListener('scroll', () => {
+        if (sandboxPre) {
+            sandboxPre.scrollTop = sandboxCodeEditor.scrollTop;
+            sandboxPre.scrollLeft = sandboxCodeEditor.scrollLeft;
+        }
+    });
+    sandboxCodeEditor.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = sandboxCodeEditor.selectionStart;
+            const end = sandboxCodeEditor.selectionEnd;
+            const val = sandboxCodeEditor.value;
+            sandboxCodeEditor.value = val.substring(0, start) + '    ' + val.substring(end);
+            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 4;
+            updateSandboxHighlight();
+        }
+    });
+}
+
 function openSandboxModal() {
     if (sandboxModal) {
         sandboxModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         ensureSkulptLoaded().catch(() => {});
+        updateSandboxHighlight();
         if (sandboxCodeEditor) sandboxCodeEditor.focus();
     }
 }
@@ -1670,6 +1704,9 @@ if (navSandboxLink) navSandboxLink.addEventListener('click', (e) => { e.preventD
 if (closeSandboxModalBtn) closeSandboxModalBtn.addEventListener('click', closeSandboxModal);
 if (sandboxBackBtn) sandboxBackBtn.addEventListener('click', closeSandboxModal);
 
+// Initial highlight on load
+updateSandboxHighlight();
+
 // Keep modal open even when clicking outside the modal box
 // (Exit is ONLY allowed by clicking the Back to Home button or the X close icon)
 
@@ -1683,6 +1720,7 @@ if (clearSandboxOutputBtn && sandboxTerminalOutput) {
 if (sandboxClearBtn && sandboxCodeEditor) {
     sandboxClearBtn.addEventListener('click', () => {
         sandboxCodeEditor.value = '';
+        updateSandboxHighlight();
         sandboxCodeEditor.focus();
     });
 }
