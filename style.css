@@ -1197,19 +1197,23 @@ body.dark-theme .editor-header {
 /* ألوان بايثون الحقيقية كما في محرر VS Code Dark+ */
 .sandbox-editor-wrapper .token.keyword {
     color: #c586c0 !important;
+    font-weight: 600;
 }
 .sandbox-editor-wrapper .token.builtin,
 .sandbox-editor-wrapper .token.function {
     color: #dcdcaa !important;
+    font-weight: 600;
 }
 .sandbox-editor-wrapper .token.string {
     color: #ce9178 !important;
 }
 .sandbox-editor-wrapper .token.comment {
     color: #6a9955 !important;
+    font-style: italic;
 }
 .sandbox-editor-wrapper .token.number {
-    color: #b5cea8 !important;
+    color: #38bdf8 !important; /* لون سماوي كهربائي ساطع للأرقام يميزها بوضوح فائق */
+    font-weight: 600;
 }
 .sandbox-editor-wrapper .token.operator {
     color: #d4d4d4 !important;

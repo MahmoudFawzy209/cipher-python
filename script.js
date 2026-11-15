@@ -1651,12 +1651,30 @@ const sandboxClearBtn = document.getElementById('sandbox-clear-btn');
 const clearSandboxOutputBtn = document.getElementById('clear-sandbox-output-btn');
 const sandboxExecTime = document.getElementById('sandbox-exec-time');
 
+// تحسين قواعد لغة بايثون في مكتبة Prism لتلوين الدوال المدمجة (print, len, input...) بالأصفر مثل VS Code
+function enhancePythonPrismGrammar() {
+    if (window.Prism && Prism.languages && Prism.languages.python) {
+        if (Prism.languages.python.keyword && Prism.languages.python.keyword.source.includes('|print|')) {
+            Prism.languages.python.keyword = new RegExp(
+                Prism.languages.python.keyword.source.replace('|print|', '|')
+            );
+        }
+        if (Prism.languages.python.builtin && !Prism.languages.python.builtin.source.includes('print|')) {
+            Prism.languages.python.builtin = new RegExp(
+                Prism.languages.python.builtin.source.replace('\\b(?:', '\\b(?:print|')
+            );
+        }
+    }
+}
+enhancePythonPrismGrammar();
+
 function updateSandboxHighlight() {
     if (!sandboxCodeEditor || !sandboxHighlightedCode) return;
     let code = sandboxCodeEditor.value || '';
     if (code.endsWith('\n')) code += ' ';
     sandboxHighlightedCode.textContent = code;
     if (window.Prism) {
+        enhancePythonPrismGrammar();
         Prism.highlightElement(sandboxHighlightedCode);
     }
 }
@@ -1669,15 +1687,103 @@ if (sandboxCodeEditor) {
             sandboxPre.scrollLeft = sandboxCodeEditor.scrollLeft;
         }
     });
+    
+    // دعم احترافي لمحرر بايثون الذكي (المسافات البادئة التلقائية 4 مسافات والتاب والأقواس)
     sandboxCodeEditor.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
+        const val = sandboxCodeEditor.value;
+        const start = sandboxCodeEditor.selectionStart;
+        const end = sandboxCodeEditor.selectionEnd;
+
+        // 1. مفتاح Enter: مسافة بادئة ذكية تلقائية (Smart Auto-Indent 4 Spaces)
+        if (e.key === 'Enter') {
             e.preventDefault();
-            const start = sandboxCodeEditor.selectionStart;
-            const end = sandboxCodeEditor.selectionEnd;
-            const val = sandboxCodeEditor.value;
-            sandboxCodeEditor.value = val.substring(0, start) + '    ' + val.substring(end);
-            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 4;
+            const lastNewline = val.lastIndexOf('\n', start - 1);
+            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+            const currentLine = val.substring(lineStart, start);
+            
+            // حساب المسافة البادئة للسطر الحالي
+            const match = currentLine.match(/^\s*/);
+            let indent = match ? match[0] : '';
+            
+            // إذا كان السطر ينتهي بنقطتين ':' يترك 4 مسافات تلقائياً في السطر الجديد
+            const trimmed = currentLine.trim();
+            if (trimmed.endsWith(':')) {
+                indent += '    ';
+            }
+            
+            const insertText = '\n' + indent;
+            sandboxCodeEditor.value = val.substring(0, start) + insertText + val.substring(end);
+            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + insertText.length;
             updateSandboxHighlight();
+            return;
+        }
+
+        // 2. مفتاح Tab: إضافة 4 مسافات مسافة بادئة (أو إزاحة الأسطر المحددة)
+        if (e.key === 'Tab' && !e.shiftKey) {
+            e.preventDefault();
+            if (start === end) {
+                sandboxCodeEditor.value = val.substring(0, start) + '    ' + val.substring(end);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 4;
+            } else {
+                const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+                const lineEnd = val.indexOf('\n', end);
+                const effectiveEnd = lineEnd === -1 ? val.length : lineEnd;
+                const lines = val.substring(lineStart, effectiveEnd).split('\n');
+                const indented = lines.map(l => '    ' + l).join('\n');
+                sandboxCodeEditor.value = val.substring(0, lineStart) + indented + val.substring(effectiveEnd);
+                sandboxCodeEditor.selectionStart = lineStart;
+                sandboxCodeEditor.selectionEnd = lineStart + indented.length;
+            }
+            updateSandboxHighlight();
+            return;
+        }
+
+        // 3. مفتاح Shift + Tab: تقليص المسافة البادئة 4 مسافات
+        if (e.key === 'Tab' && e.shiftKey) {
+            e.preventDefault();
+            const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            const lineEnd = val.indexOf('\n', end);
+            const effectiveEnd = lineEnd === -1 ? val.length : lineEnd;
+            const lines = val.substring(lineStart, effectiveEnd).split('\n');
+            const unindented = lines.map(l => l.replace(/^ {1,4}/, '')).join('\n');
+            sandboxCodeEditor.value = val.substring(0, lineStart) + unindented + val.substring(effectiveEnd);
+            sandboxCodeEditor.selectionStart = lineStart;
+            sandboxCodeEditor.selectionEnd = lineStart + unindented.length;
+            updateSandboxHighlight();
+            return;
+        }
+
+        // 4. مفتاح Backspace: حذف 4 مسافات دفعة واحدة عند بداية المسافة البادئة
+        if (e.key === 'Backspace' && start === end && start >= 4) {
+            const lastNewline = val.lastIndexOf('\n', start - 1);
+            const col = start - (lastNewline === -1 ? 0 : lastNewline + 1);
+            const precedingFour = val.substring(start - 4, start);
+            if (precedingFour === '    ' && (col % 4 === 0)) {
+                e.preventDefault();
+                sandboxCodeEditor.value = val.substring(0, start - 4) + val.substring(end);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start - 4;
+                updateSandboxHighlight();
+                return;
+            }
+        }
+
+        // 5. إغلاق وتخطي تلقائي للأقواس وعلامات التنصيص (Auto-close & skip brackets & quotes)
+        const openPairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
+        const closeChars = [')', ']', '}', '"', "'"];
+
+        if (closeChars.includes(e.key) && start === end && val.charAt(start) === e.key) {
+            e.preventDefault();
+            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+            return;
+        }
+
+        if (openPairs[e.key] && start === end) {
+            e.preventDefault();
+            const closeChar = openPairs[e.key];
+            sandboxCodeEditor.value = val.substring(0, start) + e.key + closeChar + val.substring(end);
+            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+            updateSandboxHighlight();
+            return;
         }
     });
 }
