@@ -241,21 +241,26 @@ h1, h2, h3, h4 {
 
 .hero-buttons {
     display: flex;
-    gap: 15px;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .btn {
-    padding: 12px 26px;
-    border-radius: 12px;
+    padding: 9px 20px;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.92rem;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     cursor: pointer;
     transition: var(--transition);
     border: none;
     text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.4;
 }
 
 .btn-primary {
@@ -1021,7 +1026,7 @@ body.dark-theme .editor-header {
     color: #34d399;
     border: 1px solid rgba(52, 211, 153, 0.65);
     box-shadow: 0 0 16px rgba(16, 185, 129, 0.35), inset 0 0 8px rgba(16, 185, 129, 0.15);
-    border-radius: 12px;
+    border-radius: 10px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     font-weight: 700;
@@ -1066,7 +1071,20 @@ body.dark-theme .editor-header {
 .sandbox-header-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
+
+.sandbox-header-actions .run-code-btn,
+.sandbox-header-actions .terminal-btn {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
 }
 
 .sandbox-grid {
@@ -1076,6 +1094,7 @@ body.dark-theme .editor-header {
     flex-grow: 1;
     overflow: hidden;
     margin-top: 8px;
+    direction: ltr; /* مربع الكود على اليسار ومربع المخرجات على اليمين */
 }
 
 .sandbox-panel {
@@ -1099,6 +1118,7 @@ body.dark-theme .editor-header {
     font-weight: 700;
     color: #94a3b8;
     font-family: 'Cairo', sans-serif;
+    direction: rtl; /* اتجاه قراءة العنوان من اليمين لليسار */
 }
 
 .sandbox-panel .panel-hint {
