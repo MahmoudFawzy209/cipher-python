@@ -1651,7 +1651,7 @@ const sandboxClearBtn = document.getElementById('sandbox-clear-btn');
 const clearSandboxOutputBtn = document.getElementById('clear-sandbox-output-btn');
 const sandboxExecTime = document.getElementById('sandbox-exec-time');
 
-// تحسين قواعد لغة بايثون في مكتبة Prism لتلوين الدوال المدمجة (print, len, input...) بالأصفر مثل VS Code
+// تحسين قواعد لغة بايثون في مكتبة Prism لتلوين الدوال المدمجة والبيانات المنطقية و None
 function enhancePythonPrismGrammar() {
     if (window.Prism && Prism.languages && Prism.languages.python) {
         if (Prism.languages.python.keyword && Prism.languages.python.keyword.source.includes('|print|')) {
@@ -1664,9 +1664,201 @@ function enhancePythonPrismGrammar() {
                 Prism.languages.python.builtin.source.replace('\\b(?:', '\\b(?:print|')
             );
         }
+        // إزالة True و False و None من الكلمات المفتاحية العادية وتخصيصها كـ boolean لتأخذ نفس لون الأرقام (السماوي الساطع)
+        if (Prism.languages.python.keyword) {
+            Prism.languages.python.keyword = new RegExp(
+                Prism.languages.python.keyword.source.replace(/\b(?:True|False|None)\|?/g, '')
+            );
+        }
+        Prism.languages.python.boolean = /\b(?:True|False|None)\b/;
     }
 }
 enhancePythonPrismGrammar();
+
+// عناصر واجهة محرر الأكواد الموسعة
+const sandboxLineNumbers = document.getElementById('sandbox-line-numbers');
+const sandboxCursorPos = document.getElementById('sandbox-cursor-pos');
+const sandboxDocStats = document.getElementById('sandbox-doc-stats');
+const sandboxDiagnosticPill = document.getElementById('sandbox-diagnostic-pill');
+const sandboxShortcutsBtn = document.getElementById('sandbox-shortcuts-btn');
+const sandboxShortcutsModal = document.getElementById('sandbox-shortcuts-modal');
+const closeShortcutsModalBtn = document.getElementById('close-shortcuts-modal');
+const sandboxFontPlus = document.getElementById('sandbox-font-plus');
+const sandboxFontMinus = document.getElementById('sandbox-font-minus');
+
+// دالة إظهار إشعارات خفيفة وسريعة داخل المحرر
+function showEditorToast(msg, icon = 'fa-check') {
+    let toast = document.getElementById('sandbox-editor-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sandbox-editor-toast';
+        toast.className = 'editor-toast';
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<i class="fa-solid ${icon}" style="color: #38bdf8;"></i> ${msg}`;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+}
+
+// محرك التشخيص والتحذير الذكي للغة بايثون (Python Diagnostics & Linter) مثل إضافات VS Code
+let diagnosticTimer = null;
+let currentDiagnostic = null;
+
+function runPythonDiagnostics() {
+    clearTimeout(diagnosticTimer);
+    diagnosticTimer = setTimeout(() => {
+        if (!sandboxCodeEditor) return;
+        const code = sandboxCodeEditor.value || '';
+        if (!code.trim()) {
+            currentDiagnostic = null;
+            renderDiagnostics(null);
+            return;
+        }
+
+        let diag = null;
+        const lines = code.split('\n');
+
+        // 1. فحص القواعد الشائعة والتحذيرات السريعة (Missing colons, Unclosed quotes)
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            const lineNum = i + 1;
+
+            if (trimmed.startsWith('#') || trimmed === '') continue;
+
+            // التحقق من انتهاء جمل التحكم والتعريفات بنقطتين ':'
+            if (/^(if|elif|else|for|while|def|class|try|except|finally|with)(\s+.*)?$/.test(trimmed) &&
+                !trimmed.endsWith(':') && !trimmed.endsWith('\\')) {
+                if (!trimmed.includes('#')) {
+                    diag = {
+                        type: 'warning',
+                        line: lineNum,
+                        message: `تنبيه: السطر ينقصه نقطتان ':' في نهايته`
+                    };
+                    break;
+                }
+            }
+
+            // فحص علامات الاقتباس غير المغلقة في سطر واحد
+            if (!trimmed.includes('"""') && !trimmed.includes("'''")) {
+                const doubleQuotes = (line.match(/"/g) || []).length;
+                const singleQuotes = (line.match(/'/g) || []).length;
+                if (doubleQuotes % 2 !== 0) {
+                    diag = {
+                        type: 'warning',
+                        line: lineNum,
+                        message: `تنبيه: علامة تنصيص مزدوجة (") غير مغلقة في هذا السطر`
+                    };
+                    break;
+                }
+                if (singleQuotes % 2 !== 0) {
+                    diag = {
+                        type: 'warning',
+                        line: lineNum,
+                        message: `تنبيه: علامة تنصيص فردية (') غير مغلقة في هذا السطر`
+                    };
+                    break;
+                }
+            }
+        }
+
+        // 2. فحص هيكلي عميق بواسطة محلل بايثون (Skulpt AST Parser) إذا كان محملاً
+        if (window.Sk && window.Sk.parse) {
+            try {
+                window.Sk.parse("<stdin>", code);
+                diag = null; // الكود سليم بنسبة 100%
+            } catch (err) {
+                let errLine = 1;
+                let errMsg = err.toString();
+                if (err.traceback && err.traceback.length > 0) {
+                    errLine = err.traceback[0].lineno || 1;
+                } else if (err.args && err.args.v && Array.isArray(err.args.v) && err.args.v.length >= 2 && Array.isArray(err.args.v[1])) {
+                    errLine = err.args.v[1][1] || 1;
+                }
+                const cleanMsg = err.args && err.args.v && err.args.v[0] ? (err.args.v[0].v || errMsg) : errMsg;
+                diag = {
+                    type: 'error',
+                    line: errLine,
+                    message: `خطأ نحوي (SyntaxError): ${cleanMsg}`
+                };
+            }
+        }
+
+        currentDiagnostic = diag;
+        renderDiagnostics(diag);
+    }, 350);
+}
+
+function renderDiagnostics(diag) {
+    if (!sandboxDiagnosticPill) return;
+    
+    if (!diag) {
+        sandboxDiagnosticPill.className = 'status-diagnostic status-ok';
+        sandboxDiagnosticPill.innerHTML = '<i class="fa-solid fa-circle-check"></i> بايثون: الكود سليم 100%';
+        sandboxDiagnosticPill.title = 'لا توجد أخطاء بناء جملة في الكود';
+        sandboxDiagnosticPill.onclick = null;
+    } else if (diag.type === 'error') {
+        sandboxDiagnosticPill.className = 'status-diagnostic status-error';
+        sandboxDiagnosticPill.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> سطر ${diag.line}: ${diag.message}`;
+        sandboxDiagnosticPill.title = 'انقر للانتقال إلى سطر الخطأ';
+        sandboxDiagnosticPill.onclick = () => goToLine(diag.line);
+    } else {
+        sandboxDiagnosticPill.className = 'status-diagnostic status-warning';
+        sandboxDiagnosticPill.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> سطر ${diag.line}: ${diag.message}`;
+        sandboxDiagnosticPill.title = 'انقر للانتقال إلى سطر التحذير';
+        sandboxDiagnosticPill.onclick = () => goToLine(diag.line);
+    }
+
+    renderLineNumbers(diag);
+}
+
+function renderLineNumbers(diag) {
+    if (!sandboxLineNumbers || !sandboxCodeEditor) return;
+    const lines = (sandboxCodeEditor.value || '').split('\n');
+    let html = '';
+    for (let i = 1; i <= lines.length; i++) {
+        if (diag && diag.line === i) {
+            const cls = diag.type === 'error' ? 'line-err' : 'line-warn';
+            html += `<span class="${cls}" title="${diag.message}">${i}</span>\n`;
+        } else {
+            html += i + '\n';
+        }
+    }
+    sandboxLineNumbers.innerHTML = html;
+}
+
+function goToLine(lineNum) {
+    if (!sandboxCodeEditor) return;
+    const lines = sandboxCodeEditor.value.split('\n');
+    let pos = 0;
+    for (let i = 0; i < lineNum - 1 && i < lines.length; i++) {
+        pos += lines[i].length + 1;
+    }
+    sandboxCodeEditor.focus();
+    sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = pos;
+    updateCursorStatus();
+}
+
+// تحديث مؤشرات السطر والعمود والإحصائيات
+function updateCursorStatus() {
+    if (!sandboxCodeEditor) return;
+    const val = sandboxCodeEditor.value || '';
+    const pos = sandboxCodeEditor.selectionStart || 0;
+    const linesUpToCursor = val.substring(0, pos).split('\n');
+    const lineNum = linesUpToCursor.length;
+    const colNum = linesUpToCursor[linesUpToCursor.length - 1].length + 1;
+    const totalLines = val.split('\n').length;
+    
+    if (sandboxCursorPos) {
+        sandboxCursorPos.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> سطر ${lineNum}، عمود ${colNum}`;
+    }
+    if (sandboxDocStats) {
+        sandboxDocStats.textContent = `${totalLines} أسطر | ${val.length} حرف`;
+    }
+}
 
 function updateSandboxHighlight() {
     if (!sandboxCodeEditor || !sandboxHighlightedCode) return;
@@ -1677,49 +1869,573 @@ function updateSandboxHighlight() {
         enhancePythonPrismGrammar();
         Prism.highlightElement(sandboxHighlightedCode);
     }
+    
+    // تحديث أرقام الأسطر التلقائية مع علامات التحذير
+    renderLineNumbers(currentDiagnostic);
+    
+    // تشغيل فحص الأخطاء والتحذيرات اللحظي
+    runPythonDiagnostics();
+    
+    updateCursorStatus();
 }
 
+// التحكم بحجم خط المحرر (A+ / A-)
+let currentEditorFontSize = 15;
+function setEditorFontSize(size) {
+    currentEditorFontSize = Math.min(24, Math.max(12, size));
+    const sizePx = currentEditorFontSize + 'px';
+    const linePx = Math.round(currentEditorFontSize * 1.6) + 'px';
+    
+    const editorPanel = document.querySelector('.sandbox-editor-panel');
+    if (editorPanel) {
+        editorPanel.style.setProperty('--editor-font-size', sizePx);
+        editorPanel.style.setProperty('--editor-line-height', linePx);
+    }
+    if (sandboxCodeEditor) {
+        sandboxCodeEditor.style.setProperty('font-size', sizePx, 'important');
+        sandboxCodeEditor.style.setProperty('line-height', linePx, 'important');
+    }
+    if (sandboxPre) {
+        sandboxPre.style.setProperty('font-size', sizePx, 'important');
+        sandboxPre.style.setProperty('line-height', linePx, 'important');
+    }
+    if (sandboxHighlightedCode) {
+        sandboxHighlightedCode.style.setProperty('font-size', sizePx, 'important');
+        sandboxHighlightedCode.style.setProperty('line-height', linePx, 'important');
+    }
+    if (sandboxLineNumbers) {
+        sandboxLineNumbers.style.setProperty('font-size', sizePx, 'important');
+        sandboxLineNumbers.style.setProperty('line-height', linePx, 'important');
+    }
+}
+if (sandboxFontPlus) sandboxFontPlus.addEventListener('click', () => setEditorFontSize(currentEditorFontSize + 2));
+if (sandboxFontMinus) sandboxFontMinus.addEventListener('click', () => setEditorFontSize(currentEditorFontSize - 2));
+
+// نافذة دليل الاختصارات
+if (sandboxShortcutsBtn && sandboxShortcutsModal) {
+    sandboxShortcutsBtn.addEventListener('click', () => {
+        sandboxShortcutsModal.classList.add('show');
+    });
+}
+if (closeShortcutsModalBtn && sandboxShortcutsModal) {
+    closeShortcutsModalBtn.addEventListener('click', () => {
+        sandboxShortcutsModal.classList.remove('show');
+    });
+}
+if (sandboxShortcutsModal) {
+    sandboxShortcutsModal.addEventListener('click', (e) => {
+        if (e.target === sandboxShortcutsModal) {
+            sandboxShortcutsModal.classList.remove('show');
+        }
+    });
+}
+
+// سجل التراجع والتقدم (Undo / Redo History Stack)
+const sandboxHistory = [];
+let sandboxHistoryIndex = -1;
+const MAX_SANDBOX_HISTORY = 60;
+
+function saveSandboxHistory() {
+    if (!sandboxCodeEditor) return;
+    const currentVal = sandboxCodeEditor.value;
+    const pos = sandboxCodeEditor.selectionStart;
+    
+    // إذا كانت الحالة الحالية مطابقة لآخر حالة لا نكررها
+    if (sandboxHistoryIndex >= 0 && sandboxHistory[sandboxHistoryIndex].val === currentVal) {
+        return;
+    }
+    
+    // اقتطاع أي تاريخ قادم في حال قمنا بتعديل جديد بعد التراجع
+    if (sandboxHistoryIndex < sandboxHistory.length - 1) {
+        sandboxHistory.splice(sandboxHistoryIndex + 1);
+    }
+    
+    sandboxHistory.push({ val: currentVal, pos });
+    if (sandboxHistory.length > MAX_SANDBOX_HISTORY) {
+        sandboxHistory.shift();
+    }
+    sandboxHistoryIndex = sandboxHistory.length - 1;
+
+    // حفظ تلقائي محلي مستمر
+    try {
+        localStorage.setItem('shefra_sandbox_code', currentVal);
+    } catch (_) {}
+}
+
+function undoSandbox() {
+    if (sandboxHistoryIndex > 0) {
+        sandboxHistoryIndex--;
+        const state = sandboxHistory[sandboxHistoryIndex];
+        sandboxCodeEditor.value = state.val;
+        sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = state.pos;
+        updateSandboxHighlight();
+        showEditorToast('تراجع (Undo)', 'fa-rotate-left');
+    }
+}
+
+function redoSandbox() {
+    if (sandboxHistoryIndex < sandboxHistory.length - 1) {
+        sandboxHistoryIndex++;
+        const state = sandboxHistory[sandboxHistoryIndex];
+        sandboxCodeEditor.value = state.val;
+        sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = state.pos;
+        updateSandboxHighlight();
+        showEditorToast('تقدم (Redo)', 'fa-rotate-right');
+    }
+}
+
+// دوال الإجراءات البرمجية القابلة للاستخدام عبر أزرار شريط الأدوات والاختصارات معاً:
+function toggleSandboxComment() {
+    if (!sandboxCodeEditor) return;
+    const val = sandboxCodeEditor.value;
+    const start = sandboxCodeEditor.selectionStart;
+    const end = sandboxCodeEditor.selectionEnd;
+    const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = val.indexOf('\n', end);
+    const effectiveEnd = lineEnd === -1 ? val.length : lineEnd;
+    const lines = val.substring(lineStart, effectiveEnd).split('\n');
+    
+    const allCommented = lines.every(l => l.trim() === '' || l.trim().startsWith('#'));
+    let newLines;
+    if (allCommented) {
+        newLines = lines.map(l => l.replace(/^(\s*)# ?/, '$1'));
+    } else {
+        newLines = lines.map(l => l.trim() === '' ? l : '# ' + l);
+    }
+    
+    const replaced = newLines.join('\n');
+    sandboxCodeEditor.value = val.substring(0, lineStart) + replaced + val.substring(effectiveEnd);
+    sandboxCodeEditor.selectionStart = lineStart;
+    sandboxCodeEditor.selectionEnd = lineStart + replaced.length;
+    saveSandboxHistory();
+    updateSandboxHighlight();
+    showEditorToast(allCommented ? 'تم إلغاء التهميش' : 'تم تهميش الكود (#)', 'fa-hashtag');
+}
+
+function duplicateSandboxLine(isUp = false) {
+    if (!sandboxCodeEditor) return;
+    const val = sandboxCodeEditor.value;
+    const start = sandboxCodeEditor.selectionStart;
+    const end = sandboxCodeEditor.selectionEnd;
+    const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = val.indexOf('\n', end);
+    const effectiveEnd = lineEnd === -1 ? val.length : lineEnd;
+    const isFullLineSelected = (start === lineStart && end === effectiveEnd);
+
+    if (start !== end && !isFullLineSelected) {
+        // تكرار النص المحدد فقط
+        const selectedText = val.substring(start, end);
+        sandboxCodeEditor.value = val.substring(0, end) + selectedText + val.substring(end);
+        sandboxCodeEditor.selectionStart = end;
+        sandboxCodeEditor.selectionEnd = end + selectedText.length;
+    } else {
+        // تكرار السطر بالكامل في سطر جديد
+        const lineContent = val.substring(lineStart, effectiveEnd);
+        if (isUp) {
+            sandboxCodeEditor.value = val.substring(0, lineStart) + lineContent + '\n' + val.substring(lineStart);
+            sandboxCodeEditor.selectionStart = start;
+            sandboxCodeEditor.selectionEnd = end;
+        } else {
+            sandboxCodeEditor.value = val.substring(0, effectiveEnd) + '\n' + lineContent + val.substring(effectiveEnd);
+            const offset = lineContent.length + 1;
+            sandboxCodeEditor.selectionStart = start + offset;
+            sandboxCodeEditor.selectionEnd = end + offset;
+        }
+    }
+    saveSandboxHistory();
+    updateSandboxHighlight();
+    showEditorToast('تم تكرار السطر', 'fa-clone');
+}
+
+function formatSandboxCode() {
+    if (!sandboxCodeEditor) return;
+    let code = sandboxCodeEditor.value;
+    if (!code.trim()) return;
+
+    const lines = code.split('\n');
+    const formattedLines = lines.map(line => {
+        let trimmedRight = line.replace(/\s+$/, '');
+        if (!trimmedRight.includes('"') && !trimmedRight.includes("'") && !trimmedRight.trim().startsWith('#')) {
+            trimmedRight = trimmedRight
+                .replace(/\s*([=+\-*/<>]=?|==|!=)\s*/g, ' $1 ')
+                .replace(/\s*,\s*/g, ', ')
+                .replace(/\s*:\s*$/, ':');
+        }
+        return trimmedRight;
+    });
+
+    const newCode = formattedLines.join('\n');
+    sandboxCodeEditor.value = newCode;
+    saveSandboxHistory();
+    updateSandboxHighlight();
+    showEditorToast('تم تنسيق وترتيب الكود بنجاح ✨', 'fa-wand-magic-sparkles');
+}
+
+// منظومة البحث والاستبدال المدمجة (Find & Replace Widget)
+const sandboxFindWidget = document.getElementById('sandbox-find-widget');
+const sandboxFindBtn = document.getElementById('sandbox-find-btn');
+const findInput = document.getElementById('find-input');
+const replaceInput = document.getElementById('replace-input');
+const findCount = document.getElementById('find-count');
+const findNextBtn = document.getElementById('find-next-btn');
+const findPrevBtn = document.getElementById('find-prev-btn');
+const replaceOneBtn = document.getElementById('replace-one-btn');
+const replaceAllBtn = document.getElementById('replace-all-btn');
+const closeFindBtn = document.getElementById('close-find-btn');
+
+let findMatches = [];
+let currentMatchIndex = -1;
+
+function openFindWidget() {
+    if (!sandboxFindWidget) return;
+    sandboxFindWidget.classList.remove('hidden');
+    if (findInput) {
+        findInput.focus();
+        findInput.select();
+        updateFindMatches();
+    }
+}
+
+function closeFindWidget() {
+    if (!sandboxFindWidget) return;
+    sandboxFindWidget.classList.add('hidden');
+    if (sandboxCodeEditor) sandboxCodeEditor.focus();
+}
+
+function updateFindMatches() {
+    if (!sandboxCodeEditor || !findInput || !findCount) return;
+    const query = findInput.value;
+    const code = sandboxCodeEditor.value;
+    findMatches = [];
+    currentMatchIndex = -1;
+
+    if (!query) {
+        findCount.textContent = '0/0';
+        return;
+    }
+
+    let pos = 0;
+    const lowerCode = code.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+
+    while ((pos = lowerCode.indexOf(lowerQuery, pos)) !== -1) {
+        findMatches.push({ start: pos, end: pos + query.length });
+        pos += query.length;
+    }
+
+    if (findMatches.length > 0) {
+        const selStart = sandboxCodeEditor.selectionStart;
+        currentMatchIndex = findMatches.findIndex(m => m.start >= selStart);
+        if (currentMatchIndex === -1) currentMatchIndex = 0;
+        selectCurrentMatch();
+    } else {
+        findCount.textContent = '0/0';
+    }
+}
+
+function selectCurrentMatch() {
+    if (findMatches.length === 0 || currentMatchIndex === -1) {
+        if (findCount) findCount.textContent = '0/0';
+        return;
+    }
+    const match = findMatches[currentMatchIndex];
+    sandboxCodeEditor.focus();
+    sandboxCodeEditor.selectionStart = match.start;
+    sandboxCodeEditor.selectionEnd = match.end;
+    if (findCount) findCount.textContent = `${currentMatchIndex + 1}/${findMatches.length}`;
+}
+
+function findNext() {
+    if (findMatches.length === 0) return;
+    currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
+    selectCurrentMatch();
+}
+
+function findPrev() {
+    if (findMatches.length === 0) return;
+    currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
+    selectCurrentMatch();
+}
+
+function replaceCurrentMatch() {
+    if (findMatches.length === 0 || currentMatchIndex === -1 || !replaceInput) return;
+    const match = findMatches[currentMatchIndex];
+    const rep = replaceInput.value;
+    const val = sandboxCodeEditor.value;
+    sandboxCodeEditor.value = val.substring(0, match.start) + rep + val.substring(match.end);
+    saveSandboxHistory();
+    updateSandboxHighlight();
+    updateFindMatches();
+}
+
+function replaceAllMatches() {
+    if (findMatches.length === 0 || !replaceInput) return;
+    const query = findInput.value;
+    const rep = replaceInput.value;
+    if (!query) return;
+    const val = sandboxCodeEditor.value;
+    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    sandboxCodeEditor.value = val.replace(regex, rep);
+    saveSandboxHistory();
+    updateSandboxHighlight();
+    updateFindMatches();
+    showEditorToast('تم استبدال كافة التطابقات');
+}
+
+if (sandboxFindBtn) sandboxFindBtn.addEventListener('click', openFindWidget);
+if (closeFindBtn) closeFindBtn.addEventListener('click', closeFindWidget);
+if (findInput) {
+    findInput.addEventListener('input', updateFindMatches);
+    findInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (e.shiftKey) findPrev(); else findNext();
+        } else if (e.key === 'Escape') {
+            closeFindWidget();
+        }
+    });
+}
+if (replaceInput) {
+    replaceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            replaceCurrentMatch();
+        } else if (e.key === 'Escape') {
+            closeFindWidget();
+        }
+    });
+}
+if (findNextBtn) findNextBtn.addEventListener('click', findNext);
+if (findPrevBtn) findPrevBtn.addEventListener('click', findPrev);
+if (replaceOneBtn) replaceOneBtn.addEventListener('click', replaceCurrentMatch);
+if (replaceAllBtn) replaceAllBtn.addEventListener('click', replaceAllMatches);
+
+// ربط أزرار شريط الأدوات السريعة
+const sandboxUndoBtn = document.getElementById('sandbox-undo-btn');
+const sandboxRedoBtn = document.getElementById('sandbox-redo-btn');
+const sandboxCommentBtn = document.getElementById('sandbox-comment-btn');
+const sandboxDuplicateBtn = document.getElementById('sandbox-duplicate-btn');
+const sandboxFormatBtn = document.getElementById('sandbox-format-btn');
+
+if (sandboxUndoBtn) sandboxUndoBtn.addEventListener('click', undoSandbox);
+if (sandboxRedoBtn) sandboxRedoBtn.addEventListener('click', redoSandbox);
+if (sandboxCommentBtn) sandboxCommentBtn.addEventListener('click', toggleSandboxComment);
+if (sandboxDuplicateBtn) sandboxDuplicateBtn.addEventListener('click', () => duplicateSandboxLine(false));
+if (sandboxFormatBtn) sandboxFormatBtn.addEventListener('click', formatSandboxCode);
+
 if (sandboxCodeEditor) {
-    sandboxCodeEditor.addEventListener('input', updateSandboxHighlight);
+    // كود بايثون الافتراضي لقناة شفرة
+    const DEFAULT_SHIFRA_CODE = '# مرحباً بك في محرّر بايثون\nprint("Hello shifra_channel")';
+    
+    // استعادة الكود المحفوظ مسبقاً إذا وجد، وإلا وضع الكود الافتراضي
+    try {
+        const savedVal = localStorage.getItem('shefra_sandbox_code');
+        if (savedVal && savedVal.trim() && savedVal.includes('shifra_channel')) {
+            sandboxCodeEditor.value = savedVal;
+        } else {
+            sandboxCodeEditor.value = DEFAULT_SHIFRA_CODE;
+            localStorage.setItem('shefra_sandbox_code', DEFAULT_SHIFRA_CODE);
+        }
+    } catch (_) {
+        sandboxCodeEditor.value = DEFAULT_SHIFRA_CODE;
+    }
+
+    saveSandboxHistory();
+    
+    sandboxCodeEditor.addEventListener('input', () => {
+        saveSandboxHistory();
+        updateSandboxHighlight();
+    });
+    
     sandboxCodeEditor.addEventListener('scroll', () => {
         if (sandboxPre) {
             sandboxPre.scrollTop = sandboxCodeEditor.scrollTop;
             sandboxPre.scrollLeft = sandboxCodeEditor.scrollLeft;
         }
+        if (sandboxLineNumbers) {
+            sandboxLineNumbers.scrollTop = sandboxCodeEditor.scrollTop;
+        }
     });
+
+    sandboxCodeEditor.addEventListener('click', updateCursorStatus);
+    sandboxCodeEditor.addEventListener('keyup', updateCursorStatus);
     
-    // دعم احترافي لمحرر بايثون الذكي (المسافات البادئة التلقائية 4 مسافات والتاب والأقواس)
+    // منظومة اختصارات وميزات المحرر الذكي الكاملة (مبنية وفق معايير VS Code وتعمل مع كافة لغات لوحة المفاتيح)
     sandboxCodeEditor.addEventListener('keydown', (e) => {
         const val = sandboxCodeEditor.value;
         const start = sandboxCodeEditor.selectionStart;
         const end = sandboxCodeEditor.selectionEnd;
+        const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+        const key = e.key;
+        const code = e.code;
 
-        // 1. مفتاح Enter: مسافة بادئة ذكية تلقائية (Smart Auto-Indent 4 Spaces)
-        if (e.key === 'Enter') {
+        // 1. تهميش / إلغاء تهميش الكود: Ctrl + / (يدعم مفتاح / و مفتاح ظ ومفتاح Numpad مع Shift أو بدونه)
+        const isSlashKey = (e.keyCode === 191 || e.which === 191 || code === 'Slash' || code === 'NumpadDivide' || key === '/' || key === 'ظ' || key === '؟' || key === '÷');
+        if (isCtrlOrCmd && !e.altKey && isSlashKey) {
             e.preventDefault();
-            const lastNewline = val.lastIndexOf('\n', start - 1);
-            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
-            const currentLine = val.substring(lineStart, start);
-            
-            // حساب المسافة البادئة للسطر الحالي
-            const match = currentLine.match(/^\s*/);
-            let indent = match ? match[0] : '';
-            
-            // إذا كان السطر ينتهي بنقطتين ':' يترك 4 مسافات تلقائياً في السطر الجديد
-            const trimmed = currentLine.trim();
-            if (trimmed.endsWith(':')) {
-                indent += '    ';
+            e.stopPropagation();
+            toggleSandboxComment();
+            return;
+        }
+
+        // 2. تشغيل الكود فوراً: Ctrl + Enter
+        if (isCtrlOrCmd && (key === 'Enter' || code === 'Enter' || code === 'NumpadEnter')) {
+            e.preventDefault();
+            if (sandboxRunBtn) sandboxRunBtn.click();
+            showEditorToast('⚡ جاري تشغيل الكود... [Ctrl + Enter]', 'fa-play');
+            return;
+        }
+
+        // 3. حفظ الكود محلياً: Ctrl + S
+        if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyS' || key === 's' || key === 'S' || key === 'س')) {
+            e.preventDefault();
+            localStorage.setItem('shefra_sandbox_code', val);
+            showEditorToast('💾 تم حفظ الكود محلياً بنجاح! [Ctrl + S]');
+            return;
+        }
+
+        // 4. البحث والاستبدال: Ctrl + F
+        if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
+            e.preventDefault();
+            openFindWidget();
+            return;
+        }
+
+        // 5. تنسيق وترتيب الكود: Shift + Alt + F
+        if (e.shiftKey && e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
+            e.preventDefault();
+            formatSandboxCode();
+            return;
+        }
+
+        // 6. فتح دليل الاختصارات والأوامر: F1
+        if (key === 'F1') {
+            e.preventDefault();
+            if (sandboxShortcutsBtn) sandboxShortcutsBtn.click();
+            return;
+        }
+
+        // 7. الانتقال إلى سطر معين: Ctrl + G
+        if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyG' || key === 'g' || key === 'G' || key === 'ل')) {
+            e.preventDefault();
+            const targetLine = prompt('أدخل رقم السطر الذي تريد الانتقال إليه:');
+            if (targetLine && !isNaN(targetLine)) {
+                goToLine(parseInt(targetLine, 10));
             }
-            
-            const insertText = '\n' + indent;
-            sandboxCodeEditor.value = val.substring(0, start) + insertText + val.substring(end);
-            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + insertText.length;
+            return;
+        }
+
+        // 8. التراجع والتقدم: Ctrl + Z و Ctrl + Y / Ctrl + Shift + Z (يدعم اللغتين الإنجليزية والعربية)
+        const isZKey = (code === 'KeyZ' || key === 'z' || key === 'Z' || key === 'ئ');
+        const isYKey = (code === 'KeyY' || key === 'y' || key === 'Y' || key === 'غ');
+        if (isCtrlOrCmd && !e.shiftKey && isZKey) {
+            e.preventDefault();
+            undoSandbox();
+            return;
+        }
+        if (isCtrlOrCmd && (isYKey || (e.shiftKey && isZKey))) {
+            e.preventDefault();
+            redoSandbox();
+            return;
+        }
+
+        // 9. تكرار السطر أو التحديد: Ctrl + D أو Shift + Alt + Down/Up
+        const isDuplicateKey = (code === 'KeyD' || key === 'd' || key === 'D' || key === 'ي');
+        const isAltShiftArrow = (e.altKey && e.shiftKey && (code === 'ArrowDown' || code === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowUp'));
+        if ((isCtrlOrCmd && isDuplicateKey) || isAltShiftArrow) {
+            e.preventDefault();
+            const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
+            duplicateSandboxLine(isUp);
+            return;
+        }
+
+        // 10. تحريك السطر الحالي لأعلى ولأسفل: Alt + ArrowUp / Alt + ArrowDown
+        if (e.altKey && !e.shiftKey && !isCtrlOrCmd && (code === 'ArrowUp' || code === 'ArrowDown' || key === 'ArrowUp' || key === 'ArrowDown')) {
+            e.preventDefault();
+            const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
+            const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            const lineEnd = val.indexOf('\n', end);
+            const effectiveEnd = lineEnd === -1 ? val.length : lineEnd;
+            const currentBlock = val.substring(lineStart, effectiveEnd);
+
+            if (isUp) {
+                if (lineStart === 0) return;
+                const prevLineStart = val.lastIndexOf('\n', lineStart - 2) + 1;
+                const prevLine = val.substring(prevLineStart, lineStart - 1);
+                sandboxCodeEditor.value = val.substring(0, prevLineStart) + currentBlock + '\n' + prevLine + val.substring(effectiveEnd);
+                const diff = (lineStart - prevLineStart);
+                sandboxCodeEditor.selectionStart = start - diff;
+                sandboxCodeEditor.selectionEnd = end - diff;
+            } else {
+                if (effectiveEnd >= val.length) return;
+                const nextLineEnd = val.indexOf('\n', effectiveEnd + 1);
+                const effectiveNextEnd = nextLineEnd === -1 ? val.length : nextLineEnd;
+                const nextLine = val.substring(effectiveEnd + 1, effectiveNextEnd);
+                sandboxCodeEditor.value = val.substring(0, lineStart) + nextLine + '\n' + currentBlock + val.substring(effectiveNextEnd);
+                const diff = nextLine.length + 1;
+                sandboxCodeEditor.selectionStart = start + diff;
+                sandboxCodeEditor.selectionEnd = end + diff;
+            }
+            saveSandboxHistory();
             updateSandboxHighlight();
             return;
         }
 
-        // 2. مفتاح Tab: إضافة 4 مسافات مسافة بادئة (أو إزاحة الأسطر المحددة)
-        if (e.key === 'Tab' && !e.shiftKey) {
+        // 11. حذف السطر بالكامل: Ctrl + Shift + K
+        if (isCtrlOrCmd && e.shiftKey && (code === 'KeyK' || key === 'k' || key === 'K' || key === 'ن')) {
+            e.preventDefault();
+            const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+            let lineEnd = val.indexOf('\n', end);
+            let effectiveEnd = lineEnd === -1 ? val.length : lineEnd + 1;
+            if (lineEnd === -1 && lineStart > 0) {
+                sandboxCodeEditor.value = val.substring(0, lineStart - 1);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = Math.max(0, lineStart - 1);
+            } else {
+                sandboxCodeEditor.value = val.substring(0, lineStart) + val.substring(effectiveEnd);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = lineStart;
+            }
+            saveSandboxHistory();
+            updateSandboxHighlight();
+            showEditorToast('تم حذف السطر [Ctrl + Shift + K]', 'fa-trash-can');
+            return;
+        }
+
+        // 12. مفتاح Enter: مسافة بادئة ذكية تلقائية وكسر الأقواس
+        if (key === 'Enter') {
+            e.preventDefault();
+            
+            const prevChar = start > 0 ? val.charAt(start - 1) : '';
+            const nextChar = val.charAt(start);
+            const isPairSplit = (prevChar === '{' && nextChar === '}') ||
+                                (prevChar === '(' && nextChar === ')') ||
+                                (prevChar === '[' && nextChar === ']');
+
+            const lastNewline = val.lastIndexOf('\n', start - 1);
+            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+            const currentLine = val.substring(lineStart, start);
+            const match = currentLine.match(/^\s*/);
+            let indent = match ? match[0] : '';
+
+            if (isPairSplit) {
+                const insertText = '\n' + indent + '    \n' + indent;
+                sandboxCodeEditor.value = val.substring(0, start) + insertText + val.substring(end);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1 + indent.length + 4;
+            } else {
+                const trimmed = currentLine.trim();
+                if (trimmed.endsWith(':')) {
+                    indent += '    ';
+                }
+                const insertText = '\n' + indent;
+                sandboxCodeEditor.value = val.substring(0, start) + insertText + val.substring(end);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + insertText.length;
+            }
+            saveSandboxHistory();
+            updateSandboxHighlight();
+            return;
+        }
+
+        // 13. مفتاح Tab: إضافة 4 مسافات مسافة بادئة
+        if (key === 'Tab' && !e.shiftKey) {
             e.preventDefault();
             if (start === end) {
                 sandboxCodeEditor.value = val.substring(0, start) + '    ' + val.substring(end);
@@ -1734,12 +2450,13 @@ if (sandboxCodeEditor) {
                 sandboxCodeEditor.selectionStart = lineStart;
                 sandboxCodeEditor.selectionEnd = lineStart + indented.length;
             }
+            saveSandboxHistory();
             updateSandboxHighlight();
             return;
         }
 
-        // 3. مفتاح Shift + Tab: تقليص المسافة البادئة 4 مسافات
-        if (e.key === 'Tab' && e.shiftKey) {
+        // 14. مفتاح Shift + Tab: تقليص المسافة البادئة 4 مسافات
+        if (key === 'Tab' && e.shiftKey) {
             e.preventDefault();
             const lineStart = val.lastIndexOf('\n', start - 1) + 1;
             const lineEnd = val.indexOf('\n', end);
@@ -1749,41 +2466,158 @@ if (sandboxCodeEditor) {
             sandboxCodeEditor.value = val.substring(0, lineStart) + unindented + val.substring(effectiveEnd);
             sandboxCodeEditor.selectionStart = lineStart;
             sandboxCodeEditor.selectionEnd = lineStart + unindented.length;
+            saveSandboxHistory();
             updateSandboxHighlight();
             return;
         }
 
-        // 4. مفتاح Backspace: حذف 4 مسافات دفعة واحدة عند بداية المسافة البادئة
-        if (e.key === 'Backspace' && start === end && start >= 4) {
-            const lastNewline = val.lastIndexOf('\n', start - 1);
-            const col = start - (lastNewline === -1 ? 0 : lastNewline + 1);
-            const precedingFour = val.substring(start - 4, start);
-            if (precedingFour === '    ' && (col % 4 === 0)) {
+        // 15. مفتاح Backspace: حذف ذكي لزوج الأقواس أو علامات التنصيص معاً أو 4 مسافات
+        if (key === 'Backspace' && start === end && start > 0) {
+            const prev = val.charAt(start - 1);
+            const next = val.charAt(start);
+            if ((prev === '"' && next === '"') ||
+                (prev === "'" && next === "'") ||
+                (prev === '(' && next === ')') ||
+                (prev === '[' && next === ']') ||
+                (prev === '{' && next === '}')) {
                 e.preventDefault();
-                sandboxCodeEditor.value = val.substring(0, start - 4) + val.substring(end);
-                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start - 4;
+                sandboxCodeEditor.value = val.substring(0, start - 1) + val.substring(start + 1);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start - 1;
+                saveSandboxHistory();
                 updateSandboxHighlight();
                 return;
             }
+
+            if (start >= 4) {
+                const lastNewline = val.lastIndexOf('\n', start - 1);
+                const col = start - (lastNewline === -1 ? 0 : lastNewline + 1);
+                const precedingFour = val.substring(start - 4, start);
+                if (precedingFour === '    ' && (col % 4 === 0)) {
+                    e.preventDefault();
+                    sandboxCodeEditor.value = val.substring(0, start - 4) + val.substring(end);
+                    sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start - 4;
+                    saveSandboxHistory();
+                    updateSandboxHighlight();
+                    return;
+                }
+            }
         }
 
-        // 5. إغلاق وتخطي تلقائي للأقواس وعلامات التنصيص (Auto-close & skip brackets & quotes)
+        // 16. إغلاق وتخطي وتغليف تلقائي للأقواس وعلامات التنصيص
         const openPairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
         const closeChars = [')', ']', '}', '"', "'"];
 
-        if (closeChars.includes(e.key) && start === end && val.charAt(start) === e.key) {
+        if (closeChars.includes(key) && start === end && val.charAt(start) === key) {
             e.preventDefault();
             sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
             return;
         }
 
-        if (openPairs[e.key] && start === end) {
+        if (openPairs[key]) {
             e.preventDefault();
-            const closeChar = openPairs[e.key];
-            sandboxCodeEditor.value = val.substring(0, start) + e.key + closeChar + val.substring(end);
-            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+            const closeChar = openPairs[key];
+            if (start !== end) {
+                const selectedText = val.substring(start, end);
+                sandboxCodeEditor.value = val.substring(0, start) + key + selectedText + closeChar + val.substring(end);
+                sandboxCodeEditor.selectionStart = start + 1;
+                sandboxCodeEditor.selectionEnd = end + 1;
+            } else {
+                sandboxCodeEditor.value = val.substring(0, start) + key + closeChar + val.substring(end);
+                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+            }
+            saveSandboxHistory();
             updateSandboxHighlight();
             return;
+        }
+    });
+
+    // الاستماع العام للاختصارات على مستوى النافذة (Global Window Listener) لتعمل الاختصارات من أي موضع
+    window.addEventListener('keydown', (e) => {
+        if (sandboxModal && sandboxModal.classList.contains('show')) {
+            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+            const key = e.key;
+            const code = e.code;
+
+            // تشغيل الكود: Ctrl + Enter
+            if (isCtrlOrCmd && (key === 'Enter' || code === 'Enter' || code === 'NumpadEnter')) {
+                e.preventDefault();
+                if (sandboxRunBtn) sandboxRunBtn.click();
+                showEditorToast('⚡ جاري تشغيل الكود... [Ctrl + Enter]', 'fa-play');
+                return;
+            }
+
+            // حفظ الكود: Ctrl + S
+            if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyS' || key === 's' || key === 'S' || key === 'س')) {
+                e.preventDefault();
+                localStorage.setItem('shefra_sandbox_code', sandboxCodeEditor.value);
+                showEditorToast('💾 تم حفظ الكود محلياً بنجاح [Ctrl + S]');
+                return;
+            }
+
+            // البحث: Ctrl + F
+            if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
+                e.preventDefault();
+                openFindWidget();
+                return;
+            }
+
+            // التنسيق: Shift + Alt + F
+            if (e.shiftKey && e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
+                e.preventDefault();
+                formatSandboxCode();
+                return;
+            }
+
+            // تهميش / إلغاء التهميش: Ctrl + / (ويدعم لوحة المفاتيح العربية والإنجليزية)
+            const isSlashKey = (e.keyCode === 191 || e.which === 191 || code === 'Slash' || code === 'NumpadDivide' || key === '/' || key === 'ظ' || key === '؟' || key === '÷');
+            if (isCtrlOrCmd && !e.altKey && isSlashKey) {
+                e.preventDefault();
+                toggleSandboxComment();
+                return;
+            }
+
+            // تكرار السطر: Ctrl + D أو Shift + Alt + Down/Up
+            const isDuplicateKey = (code === 'KeyD' || key === 'd' || key === 'D' || key === 'ي');
+            const isAltShiftArrow = (e.altKey && e.shiftKey && (code === 'ArrowDown' || code === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowUp'));
+            if ((isCtrlOrCmd && isDuplicateKey) || isAltShiftArrow) {
+                e.preventDefault();
+                const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
+                duplicateSandboxLine(isUp);
+                return;
+            }
+
+            // التراجع والتقدم: Ctrl + Z / Ctrl + Y
+            const isZKey = (code === 'KeyZ' || key === 'z' || key === 'Z' || key === 'ئ');
+            const isYKey = (code === 'KeyY' || key === 'y' || key === 'Y' || key === 'غ');
+            if (isCtrlOrCmd && !e.shiftKey && isZKey && e.target !== sandboxCodeEditor) {
+                e.preventDefault();
+                undoSandbox();
+                return;
+            }
+            if (isCtrlOrCmd && (isYKey || (e.shiftKey && isZKey)) && e.target !== sandboxCodeEditor) {
+                e.preventDefault();
+                redoSandbox();
+                return;
+            }
+
+            // دليل الاختصارات: F1
+            if (key === 'F1') {
+                e.preventDefault();
+                if (sandboxShortcutsModal) sandboxShortcutsModal.classList.toggle('show');
+                return;
+            }
+
+            // إغلاق بـ Esc
+            if (key === 'Escape') {
+                if (sandboxShortcutsModal && sandboxShortcutsModal.classList.contains('show')) {
+                    sandboxShortcutsModal.classList.remove('show');
+                    return;
+                }
+                if (sandboxFindWidget && !sandboxFindWidget.classList.contains('hidden')) {
+                    closeFindWidget();
+                    return;
+                }
+            }
         }
     });
 }
@@ -1794,7 +2628,13 @@ function openSandboxModal() {
         document.body.style.overflow = 'hidden';
         ensureSkulptLoaded().catch(() => {});
         updateSandboxHighlight();
-        if (sandboxCodeEditor) sandboxCodeEditor.focus();
+        // تركيز فوري على مربع الكود لتكون اختصارات الكيبورد جاهزة للاستقبال في نفس اللحظة
+        setTimeout(() => {
+            if (sandboxCodeEditor) {
+                sandboxCodeEditor.focus();
+                updateCursorStatus();
+            }
+        }, 50);
     }
 }
 

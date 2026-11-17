@@ -430,7 +430,7 @@
     <!-- مكتبة PrismJS لتلوين الكود (ثيم Tomorrow Night المشابه للوضع الليلي) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <!-- ملف التنسيقات الخاص بنا -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 
 <body class="dark-theme">
@@ -629,15 +629,62 @@
                 </div>
             </div>
             <div class="sandbox-grid">
-                <!-- المربع الأول: كتابة وتعديل الكود بنمط VS Code -->
+                <!-- المربع الأول: كتابة وتعديل الكود بنمط VS Code الاحترافي -->
                 <div class="sandbox-panel sandbox-editor-panel">
                     <div class="panel-header">
-                        <span><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</span>
-                        <span class="panel-hint">Python 3 (VS Code style)</span>
+                        <div class="panel-header-left">
+                            <span><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</span>
+                            <span class="panel-hint">Python 3 (VS Code style)</span>
+                        </div>
+                        <div class="panel-header-tools">
+                            <button type="button" id="sandbox-undo-btn" class="editor-mini-btn" title="تراجع (Ctrl + Z)"><i class="fa-solid fa-rotate-left"></i></button>
+                            <button type="button" id="sandbox-redo-btn" class="editor-mini-btn" title="تقدم (Ctrl + Y)"><i class="fa-solid fa-rotate-right"></i></button>
+                            <button type="button" id="sandbox-comment-btn" class="editor-mini-btn" title="تهميش / إلغاء تهميش (Ctrl + /)"><i class="fa-solid fa-hashtag"></i> تهميش</button>
+                            <button type="button" id="sandbox-duplicate-btn" class="editor-mini-btn" title="تكرار السطر (Ctrl + D)"><i class="fa-regular fa-clone"></i> تكرار</button>
+                            <button type="button" id="sandbox-find-btn" class="editor-mini-btn" title="بحث واستبدال (Ctrl + F)"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
+                            <button type="button" id="sandbox-format-btn" class="editor-mini-btn" title="تنسيق الكود (Shift + Alt + F)"><i class="fa-solid fa-wand-magic-sparkles"></i> تنسيق</button>
+                            <button type="button" id="sandbox-shortcuts-btn" class="editor-mini-btn" title="دليل كل الاختصارات (F1)"><i class="fa-solid fa-keyboard"></i> الاختصارات</button>
+                            <button type="button" id="sandbox-font-minus" class="editor-mini-btn" title="تصغير حجم الخط"><i class="fa-solid fa-minus"></i> A</button>
+                            <button type="button" id="sandbox-font-plus" class="editor-mini-btn" title="تكبير حجم الخط"><i class="fa-solid fa-plus"></i> A</button>
+                        </div>
                     </div>
-                    <div class="sandbox-editor-wrapper">
-                        <pre id="sandbox-pre" class="sandbox-pre language-python" aria-hidden="true"><code id="sandbox-highlighted-code" class="language-python">print(&quot;Hello shifra channel&quot;)</code></pre>
-                        <textarea id="sandbox-code-editor" class="sandbox-textarea" spellcheck="false" placeholder="# اكتب أو ألصق كود بايثون هنا...">print(&quot;Hello shifra channel&quot;)</textarea>
+                    <!-- شريط البحث والاستبدال المدمج (Find & Replace Bar) -->
+                    <div id="sandbox-find-widget" class="sandbox-find-widget hidden" dir="ltr">
+                        <div class="find-inputs">
+                            <div class="find-row">
+                                <input type="text" id="find-input" placeholder="بحث عن كلمة (Find)..." autocomplete="off" spellcheck="false">
+                                <span id="find-count" class="find-count">0/0</span>
+                                <button type="button" id="find-prev-btn" class="find-btn" title="السابق (Shift + Enter)"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button type="button" id="find-next-btn" class="find-btn" title="التالي (Enter)"><i class="fa-solid fa-arrow-down"></i></button>
+                            </div>
+                            <div class="replace-row" id="replace-row">
+                                <input type="text" id="replace-input" placeholder="استبدال بـ (Replace with)..." autocomplete="off" spellcheck="false">
+                                <button type="button" id="replace-one-btn" class="find-btn" title="استبدال الكلمة الحالية">استبدال</button>
+                                <button type="button" id="replace-all-btn" class="find-btn" title="استبدال كافة التطابقات">استبدال الكل</button>
+                            </div>
+                        </div>
+                        <button type="button" id="close-find-btn" class="find-close-btn" title="إغلاق (Esc)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="sandbox-editor-container" dir="ltr">
+                        <div id="sandbox-line-numbers" class="sandbox-line-numbers" aria-hidden="true" dir="ltr">1</div>
+                        <div class="sandbox-editor-wrapper" dir="ltr">
+                            <pre id="sandbox-pre" class="sandbox-pre language-python" dir="ltr" aria-hidden="true"><code id="sandbox-highlighted-code" class="language-python" dir="ltr"># مرحباً بك في محرّر بايثون&#10;print(&quot;Hello shifra_channel&quot;)</code></pre>
+                            <textarea id="sandbox-code-editor" class="sandbox-textarea" dir="ltr" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" data-lt-active="false" placeholder="# اكتب أو ألصق كود بايثون هنا..."># مرحباً بك في محرّر بايثون&#10;print(&quot;Hello shifra_channel&quot;)</textarea>
+                        </div>
+                    </div>
+                    <!-- شريط الحالة (Status Bar) -->
+                    <div class="sandbox-status-bar" dir="ltr">
+                        <div class="status-left">
+                            <span id="sandbox-cursor-pos"><i class="fa-solid fa-location-crosshairs"></i> سطر 1، عمود 1</span>
+                            <span id="sandbox-doc-stats">1 أسطر | 30 حرف</span>
+                            <span id="sandbox-diagnostic-pill" class="status-diagnostic status-ok"><i class="fa-solid fa-circle-check"></i> بايثون: الكود سليم</span>
+                        </div>
+                        <div class="status-right">
+                            <span class="status-tip"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> للتشغيل</span>
+                            <span class="status-tip"><kbd>Ctrl</kbd> + <kbd>S</kbd> للحفظ</span>
+                            <span>UTF-8</span>
+                            <span>Python 3.10</span>
+                        </div>
                     </div>
                 </div>
 
@@ -647,7 +694,7 @@
                         <span><i class="fa-solid fa-terminal"></i> مخرجات الكود (Terminal Output)</span>
                         <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
                     </div>
-                    <div id="sandbox-terminal-output" class="sandbox-output">Hello shifra channel</div>
+                    <div id="sandbox-terminal-output" class="sandbox-output">Hello shifra_channel</div>
                 </div>
             </div>
         </div>
@@ -684,6 +731,96 @@
         </div>
     </div>
 
+    <!-- نافذة دليل اختصارات لوحة المفاتيح لمحرر الأكواد -->
+    <div id="sandbox-shortcuts-modal" class="modal">
+        <div class="shortcuts-modal-box">
+            <div class="shortcuts-modal-header">
+                <h3><i class="fa-solid fa-keyboard" style="color: #38bdf8;"></i> دليل اختصارات محرر الأكواد (VS Code Style)</h3>
+                <button id="close-shortcuts-modal" class="icon-btn" type="button">&times;</button>
+            </div>
+            <div class="shortcuts-modal-body">
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>الوظيفة / الإجراء</th>
+                            <th>الاختصار (Shortcut)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>⚡ تشغيل الكود فوراً</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>💾 حفظ الكود محلياً</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>📋 تكرار السطر أو التحديد</strong></td>
+                            <td><kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>↓ / ↑</kbd> أو <kbd>Ctrl</kbd> + <kbd>D</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>💬 تهميش / إلغاء تهميش السطر</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>/</kbd> (يدعم الإنجليزية والعربية <kbd>Ctrl</kbd> + <kbd>ظ</kbd>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>↕️ تحريك السطر لأعلى / لأسفل</strong></td>
+                            <td><kbd>Alt</kbd> + <kbd>↑ / ↓</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>↩️ تراجع (Undo)</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>Z</kbd> (يدعم الإنجليزية والعربية)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>↪️ تقدم (Redo)</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>Y</kbd> أو <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>🗑️ حذف السطر بالكامل</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>⏩ مسافة بادئة 4 مسافات</strong></td>
+                            <td><kbd>Tab</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>⏪ تقليص المسافة البادئة</strong></td>
+                            <td><kbd>Shift</kbd> + <kbd>Tab</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>✨ إغلاق وتغليف الأقواس والتنصيص تلقائياً</strong></td>
+                            <td>كتابة <kbd>"</kbd> أو <kbd>'</kbd> أو <kbd>(</kbd> أو <kbd>[</kbd> أو <kbd>{</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>⌫ حذف زوج الأقواس/التنصيص معاً</strong></td>
+                            <td><kbd>Backspace</kbd> بين علامتي التنصيص أو الأقواس</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔍 البحث والاستبدال في الكود</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>F</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>🪄 تنسيق وترتيب الكود تلقائياً</strong></td>
+                            <td><kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>F</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>📍 الانتقال السريع لرقم سطر</strong></td>
+                            <td><kbd>Ctrl</kbd> + <kbd>G</kbd></td>
+                        </tr>
+                        <tr>
+                            <td><strong>📖 فتح دليل الأوامر والاختصارات</strong></td>
+                            <td><kbd>F1</kbd> أو زر «الاختصارات»</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔍 تكبير / تصغير الخط</strong></td>
+                            <td>أزرار <kbd>A+</kbd> و <kbd>A-</kbd> في رأس المحرر</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- التذييل (Footer) -->
     <footer>
         <div class="container footer-content">
@@ -705,7 +842,7 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <!-- ملف الجافاسكربت الخاص بنا -->
-    <script defer src="script.js"></script>
+    <script defer src="script.js?v=22"></script>
     <!-- تسجيل وتحديث الـ Service Worker للتحميل اللحظي والتحديث الفوري -->
     <script>
         if ('serviceWorker' in navigator) {
