@@ -114,9 +114,17 @@ h1, h2, h3, h4 {
 }
 
 .logo-img {
-    height: 45px;
-    width: auto;
-    object-fit: contain;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(250, 204, 21, 0.3);
 }
 
 .nav-links {
