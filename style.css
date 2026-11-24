@@ -120,7 +120,7 @@ h1, h2, h3, h4 {
     font-weight: 700;
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
-    display: inline-flex;
+    display: none !important; /* مخفي في شاشات الكمبيوتر ويظهر في الهاتف فقط */
     align-items: center;
     gap: 7px;
     box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
@@ -1121,6 +1121,10 @@ body.dark-theme .editor-header {
     white-space: nowrap;
 }
 
+.mobile-editor-tabs {
+    display: none !important; /* مخفي تماماً في شاشات الكمبيوتر */
+}
+
 .sandbox-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1980,12 +1984,16 @@ body.admin-mode .admin-infographic-bar {
         display: none; /* In a real project, we add a hamburger menu */
     }
 
+    .header-editor-badge {
+        display: inline-flex !important;
+    }
+
     .mobile-code-btn {
         display: inline-flex;
     }
 
     .mobile-editor-tabs {
-        display: flex;
+        display: flex !important;
         background: #0d121f;
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 10px;
