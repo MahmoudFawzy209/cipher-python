@@ -104,6 +104,37 @@ h1, h2, h3, h4 {
     height: 100%;
 }
 
+.nav-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-editor-badge {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.18));
+    border: 1px solid rgba(52, 211, 153, 0.65);
+    color: #34d399;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    transition: all 0.25s ease;
+}
+
+.header-editor-badge:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(6, 182, 212, 0.35));
+    border-color: #6ee7b7;
+    color: #ffffff;
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
 .logo {
     font-size: 1.5rem;
     font-weight: 800;
@@ -1305,22 +1336,22 @@ body.dark-theme .editor-header {
     font-family: 'Consolas', 'Courier New', monospace !important;
     font-size: var(--editor-font-size, 15px) !important;
     line-height: var(--editor-line-height, 24px) !important;
-    letter-spacing: 0px !important;
-    word-spacing: 0px !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
     tab-size: 4 !important;
     -moz-tab-size: 4 !important;
+    text-rendering: optimizeSpeed !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
     font-variant-ligatures: none !important;
-    font-feature-settings: "liga" 0, "calt" 0, "dlig" 0 !important;
+    font-feature-settings: normal !important;
     direction: ltr !important;
     text-align: left !important;
-    unicode-bidi: isolate !important;
+    unicode-bidi: normal !important;
     white-space: pre !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
-    padding: 16px !important;
     margin: 0 !important;
-    border: none !important;
-    outline: none !important;
     box-sizing: border-box !important;
 }
 
@@ -1333,12 +1364,16 @@ body.dark-theme .editor-header {
     overflow: hidden;
     pointer-events: none;
     background: transparent !important;
+    padding: 16px !important;
+    border: 0 !important;
 }
 
 .sandbox-pre code {
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
+    display: inline !important;
+    border: 0 !important;
 }
 
 .sandbox-textarea {
@@ -1350,8 +1385,14 @@ body.dark-theme .editor-header {
     overflow: auto;
     background: transparent;
     color: transparent;
+    -webkit-text-fill-color: transparent;
     caret-color: #38bdf8;
     resize: none;
+    padding: 16px !important;
+    border: 0 !important;
+    outline: none !important;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 /* شريط الحالة أسفل المحرر (Status Bar) */
@@ -1937,6 +1978,108 @@ body.admin-mode .admin-infographic-bar {
     .nav-links {
         display: none; /* In a real project, we add a hamburger menu */
     }
+
+    .mobile-code-btn {
+        display: inline-flex;
+    }
+
+    .mobile-editor-tabs {
+        display: flex;
+        background: #0d121f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 4px;
+        margin: 6px 0;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .mobile-tab-btn {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        padding: 8px 10px;
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-tab-btn.active {
+        background: #1e293b;
+        color: #38bdf8;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* تحويل نافذة المحرر على الهاتف إلى Full-Screen Page مستقلة تامة ومريحة */
+    .sandbox-modal-content {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 10px 12px !important;
+        margin: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .sandbox-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-grow: 1 !important;
+        height: calc(100vh - 130px) !important;
+        margin-top: 4px !important;
+        overflow: hidden !important;
+    }
+
+    .sandbox-grid .sandbox-panel {
+        display: none !important;
+        flex-grow: 1 !important;
+        height: 100% !important;
+        border-radius: 10px !important;
+    }
+
+    .sandbox-grid .sandbox-panel.active-mobile-panel {
+        display: flex !important;
+    }
+
+    .modal-top-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    .sandbox-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .sandbox-header-actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sandbox-header-actions .run-code-btn,
+    .sandbox-header-actions .terminal-btn {
+        flex-shrink: 0;
+    }
     
     .section-header {
         flex-direction: column;
@@ -1946,4 +2089,97 @@ body.admin-mode .admin-infographic-bar {
     .search-box {
         max-width: 100%;
     }
+}
+
+/* تنسيقات زر المحرر على الهاتف والأزرار المتوهجة وسطر الإدخال التفاعلي */
+.nav-extra-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-code-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+    border: 1px solid rgba(52, 211, 153, 0.6);
+    color: #34d399;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.mobile-code-btn:hover {
+    background: rgba(16, 185, 129, 0.35);
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-sandbox-glow {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(6, 182, 212, 0.22));
+    border: 1px solid rgba(52, 211, 153, 0.75);
+    color: #34d399 !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.35), inset 0 0 10px rgba(16, 185, 129, 0.15);
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-sandbox-glow:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(6, 182, 212, 0.4));
+    border-color: #6ee7b7;
+    color: #ffffff !important;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.65), inset 0 0 14px rgba(16, 185, 129, 0.3);
+    transform: translateY(-3px) scale(1.02);
+}
+
+/* سطر الإدخال التفاعلي المباشر لدالة input() داخل الطرفية */
+.term-input-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    background: rgba(56, 189, 248, 0.08);
+    border-right: 3px solid #38bdf8;
+    padding: 4px 8px;
+    border-radius: 6px 0 0 6px;
+    box-sizing: border-box;
+}
+
+.term-input-prompt {
+    color: #38bdf8;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-weight: 600;
+    white-space: pre-wrap;
+    direction: ltr;
+    text-align: left;
+}
+
+.term-inline-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #34d399;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex-grow: 1;
+    caret-color: #34d399;
+    padding: 2px 4px;
+    margin: 0;
+    direction: ltr;
+    text-align: left;
 }

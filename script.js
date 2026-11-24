@@ -1559,6 +1559,66 @@ if (closeTerminalBtn && codeTerminal) {
     });
 }
 
+function promptTerminalInput(containerElement, promptText) {
+    return new Promise((resolve) => {
+        if (!containerElement) {
+            const val = window.prompt(promptText || 'أدخل قيمة input():');
+            return resolve(val !== null ? val : '');
+        }
+
+        const inputLine = document.createElement('div');
+        inputLine.className = 'term-input-line';
+
+        if (promptText) {
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'term-input-prompt';
+            promptSpan.textContent = promptText;
+            inputLine.appendChild(promptSpan);
+        }
+
+        const inputElem = document.createElement('input');
+        inputElem.type = 'text';
+        inputElem.className = 'term-inline-input';
+        inputElem.spellcheck = false;
+        inputElem.autocomplete = 'off';
+        inputLine.appendChild(inputElem);
+
+        containerElement.appendChild(inputLine);
+        containerElement.scrollTop = containerElement.scrollHeight;
+
+        setTimeout(() => inputElem.focus(), 25);
+
+        const onContainerClick = (e) => {
+            if (e.target !== inputElem && document.body.contains(inputElem)) {
+                inputElem.focus();
+            }
+        };
+        containerElement.addEventListener('click', onContainerClick);
+
+        inputElem.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                const value = inputElem.value;
+                containerElement.removeEventListener('click', onContainerClick);
+
+                inputLine.remove();
+                if (promptText) {
+                    containerElement.appendChild(document.createTextNode(promptText));
+                }
+                const enteredText = document.createElement('span');
+                enteredText.style.color = '#38bdf8';
+                enteredText.style.fontWeight = '600';
+                enteredText.textContent = value + '\n';
+                containerElement.appendChild(enteredText);
+                containerElement.scrollTop = containerElement.scrollHeight;
+
+                resolve(value);
+            }
+        });
+    });
+}
+
 if (runCodeOnlineBtn) {
     runCodeOnlineBtn.addEventListener('click', async () => {
         const codeToRun = currentLessonCode || '';
@@ -1594,12 +1654,7 @@ if (runCodeOnlineBtn) {
             window.Sk.configure({
                 output: outf,
                 read: builtinRead,
-                inputfun: (promptText) => {
-                    return new Promise((resolve) => {
-                        const val = window.prompt(promptText || 'أدخل قيمة الإدخال input():');
-                        resolve(val || '');
-                    });
-                },
+                inputfun: (promptText) => promptTerminalInput(terminalOutput, promptText),
                 inputfunTakesPrompt: true
             });
 
@@ -1933,36 +1988,46 @@ if (sandboxShortcutsModal) {
 // سجل التراجع والتقدم (Undo / Redo History Stack)
 const sandboxHistory = [];
 let sandboxHistoryIndex = -1;
-const MAX_SANDBOX_HISTORY = 60;
+const MAX_SANDBOX_HISTORY = 200;
+let historyDebounceTimer = null;
 
-function saveSandboxHistory() {
+function saveSandboxHistory(immediate = false) {
     if (!sandboxCodeEditor) return;
     const currentVal = sandboxCodeEditor.value;
     const pos = sandboxCodeEditor.selectionStart;
     
-    // إذا كانت الحالة الحالية مطابقة لآخر حالة لا نكررها
-    if (sandboxHistoryIndex >= 0 && sandboxHistory[sandboxHistoryIndex].val === currentVal) {
-        return;
-    }
-    
-    // اقتطاع أي تاريخ قادم في حال قمنا بتعديل جديد بعد التراجع
-    if (sandboxHistoryIndex < sandboxHistory.length - 1) {
-        sandboxHistory.splice(sandboxHistoryIndex + 1);
-    }
-    
-    sandboxHistory.push({ val: currentVal, pos });
-    if (sandboxHistory.length > MAX_SANDBOX_HISTORY) {
-        sandboxHistory.shift();
-    }
-    sandboxHistoryIndex = sandboxHistory.length - 1;
+    const pushState = () => {
+        if (sandboxHistoryIndex >= 0 && sandboxHistory[sandboxHistoryIndex].val === currentVal) {
+            return;
+        }
+        if (sandboxHistoryIndex < sandboxHistory.length - 1) {
+            sandboxHistory.splice(sandboxHistoryIndex + 1);
+        }
+        sandboxHistory.push({ val: currentVal, pos });
+        if (sandboxHistory.length > MAX_SANDBOX_HISTORY) {
+            sandboxHistory.shift();
+        }
+        sandboxHistoryIndex = sandboxHistory.length - 1;
 
-    // حفظ تلقائي محلي مستمر
-    try {
-        localStorage.setItem('shefra_sandbox_code', currentVal);
-    } catch (_) {}
+        try {
+            localStorage.setItem('shefra_sandbox_code', currentVal);
+        } catch (_) {}
+    };
+
+    if (immediate) {
+        if (historyDebounceTimer) clearTimeout(historyDebounceTimer);
+        pushState();
+    } else {
+        if (historyDebounceTimer) clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = setTimeout(pushState, 350);
+    }
 }
 
 function undoSandbox() {
+    if (historyDebounceTimer) {
+        clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = null;
+    }
     if (sandboxHistoryIndex > 0) {
         sandboxHistoryIndex--;
         const state = sandboxHistory[sandboxHistoryIndex];
@@ -1974,6 +2039,10 @@ function undoSandbox() {
 }
 
 function redoSandbox() {
+    if (historyDebounceTimer) {
+        clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = null;
+    }
     if (sandboxHistoryIndex < sandboxHistory.length - 1) {
         sandboxHistoryIndex++;
         const state = sandboxHistory[sandboxHistoryIndex];
@@ -2042,9 +2111,9 @@ function duplicateSandboxLine(isUp = false) {
             sandboxCodeEditor.selectionEnd = end + offset;
         }
     }
-    saveSandboxHistory();
+    saveSandboxHistory(true);
     updateSandboxHighlight();
-    showEditorToast('تم تكرار السطر', 'fa-clone');
+    showEditorToast(isUp ? 'تم تكرار السطر لأعلى [Shift + Alt + ↑]' : 'تم تكرار السطر لأسفل [Shift + Alt + ↓]', 'fa-clone');
 }
 
 function formatSandboxCode() {
@@ -2217,11 +2286,11 @@ const sandboxCommentBtn = document.getElementById('sandbox-comment-btn');
 const sandboxDuplicateBtn = document.getElementById('sandbox-duplicate-btn');
 const sandboxFormatBtn = document.getElementById('sandbox-format-btn');
 
-if (sandboxUndoBtn) sandboxUndoBtn.addEventListener('click', undoSandbox);
-if (sandboxRedoBtn) sandboxRedoBtn.addEventListener('click', redoSandbox);
-if (sandboxCommentBtn) sandboxCommentBtn.addEventListener('click', toggleSandboxComment);
-if (sandboxDuplicateBtn) sandboxDuplicateBtn.addEventListener('click', () => duplicateSandboxLine(false));
-if (sandboxFormatBtn) sandboxFormatBtn.addEventListener('click', formatSandboxCode);
+if (sandboxUndoBtn) sandboxUndoBtn.addEventListener('click', () => { undoSandbox(); if (sandboxCodeEditor) sandboxCodeEditor.focus(); });
+if (sandboxRedoBtn) sandboxRedoBtn.addEventListener('click', () => { redoSandbox(); if (sandboxCodeEditor) sandboxCodeEditor.focus(); });
+if (sandboxCommentBtn) sandboxCommentBtn.addEventListener('click', () => { toggleSandboxComment(); if (sandboxCodeEditor) sandboxCodeEditor.focus(); });
+if (sandboxDuplicateBtn) sandboxDuplicateBtn.addEventListener('click', () => { duplicateSandboxLine(false); if (sandboxCodeEditor) sandboxCodeEditor.focus(); });
+if (sandboxFormatBtn) sandboxFormatBtn.addEventListener('click', () => { formatSandboxCode(); if (sandboxCodeEditor) sandboxCodeEditor.focus(); });
 
 if (sandboxCodeEditor) {
     // كود بايثون الافتراضي لقناة شفرة
@@ -2281,6 +2350,7 @@ if (sandboxCodeEditor) {
         // 2. تشغيل الكود فوراً: Ctrl + Enter
         if (isCtrlOrCmd && (key === 'Enter' || code === 'Enter' || code === 'NumpadEnter')) {
             e.preventDefault();
+            e.stopPropagation();
             if (sandboxRunBtn) sandboxRunBtn.click();
             showEditorToast('⚡ جاري تشغيل الكود... [Ctrl + Enter]', 'fa-play');
             return;
@@ -2289,6 +2359,7 @@ if (sandboxCodeEditor) {
         // 3. حفظ الكود محلياً: Ctrl + S
         if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyS' || key === 's' || key === 'S' || key === 'س')) {
             e.preventDefault();
+            e.stopPropagation();
             localStorage.setItem('shefra_sandbox_code', val);
             showEditorToast('💾 تم حفظ الكود محلياً بنجاح! [Ctrl + S]');
             return;
@@ -2297,6 +2368,7 @@ if (sandboxCodeEditor) {
         // 4. البحث والاستبدال: Ctrl + F
         if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
             e.preventDefault();
+            e.stopPropagation();
             openFindWidget();
             return;
         }
@@ -2304,6 +2376,7 @@ if (sandboxCodeEditor) {
         // 5. تنسيق وترتيب الكود: Shift + Alt + F
         if (e.shiftKey && e.altKey && (code === 'KeyF' || key === 'f' || key === 'F' || key === 'ب')) {
             e.preventDefault();
+            e.stopPropagation();
             formatSandboxCode();
             return;
         }
@@ -2311,6 +2384,7 @@ if (sandboxCodeEditor) {
         // 6. فتح دليل الاختصارات والأوامر: F1
         if (key === 'F1') {
             e.preventDefault();
+            e.stopPropagation();
             if (sandboxShortcutsBtn) sandboxShortcutsBtn.click();
             return;
         }
@@ -2318,6 +2392,7 @@ if (sandboxCodeEditor) {
         // 7. الانتقال إلى سطر معين: Ctrl + G
         if (isCtrlOrCmd && !e.shiftKey && !e.altKey && (code === 'KeyG' || key === 'g' || key === 'G' || key === 'ل')) {
             e.preventDefault();
+            e.stopPropagation();
             const targetLine = prompt('أدخل رقم السطر الذي تريد الانتقال إليه:');
             if (targetLine && !isNaN(targetLine)) {
                 goToLine(parseInt(targetLine, 10));
@@ -2330,21 +2405,27 @@ if (sandboxCodeEditor) {
         const isYKey = (code === 'KeyY' || key === 'y' || key === 'Y' || key === 'غ');
         if (isCtrlOrCmd && !e.shiftKey && isZKey) {
             e.preventDefault();
+            e.stopPropagation();
             undoSandbox();
             return;
         }
         if (isCtrlOrCmd && (isYKey || (e.shiftKey && isZKey))) {
             e.preventDefault();
+            e.stopPropagation();
             redoSandbox();
             return;
         }
 
-        // 9. تكرار السطر أو التحديد: Ctrl + D أو Shift + Alt + Down/Up
+        // 9. تكرار السطر أو التحديد: Shift + Alt + Down/Up أو Alt + Shift + Down/Up أو Ctrl + D
         const isDuplicateKey = (code === 'KeyD' || key === 'd' || key === 'D' || key === 'ي');
-        const isAltShiftArrow = (e.altKey && e.shiftKey && (code === 'ArrowDown' || code === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowUp'));
-        if ((isCtrlOrCmd && isDuplicateKey) || isAltShiftArrow) {
+        const hasAltAndShift = (e.altKey && e.shiftKey);
+        const isDownArrow = (code === 'ArrowDown' || key === 'ArrowDown' || key === 'Down');
+        const isUpArrow = (code === 'ArrowUp' || key === 'ArrowUp' || key === 'Up');
+
+        if ((isCtrlOrCmd && isDuplicateKey) || (hasAltAndShift && (isDownArrow || isUpArrow))) {
             e.preventDefault();
-            const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
+            e.stopPropagation();
+            const isUp = isUpArrow;
             duplicateSandboxLine(isUp);
             return;
         }
@@ -2352,6 +2433,7 @@ if (sandboxCodeEditor) {
         // 10. تحريك السطر الحالي لأعلى ولأسفل: Alt + ArrowUp / Alt + ArrowDown
         if (e.altKey && !e.shiftKey && !isCtrlOrCmd && (code === 'ArrowUp' || code === 'ArrowDown' || key === 'ArrowUp' || key === 'ArrowDown')) {
             e.preventDefault();
+            e.stopPropagation();
             const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
             const lineStart = val.lastIndexOf('\n', start - 1) + 1;
             const lineEnd = val.indexOf('\n', end);
@@ -2384,6 +2466,7 @@ if (sandboxCodeEditor) {
         // 11. حذف السطر بالكامل: Ctrl + Shift + K
         if (isCtrlOrCmd && e.shiftKey && (code === 'KeyK' || key === 'k' || key === 'K' || key === 'ن')) {
             e.preventDefault();
+            e.stopPropagation();
             const lineStart = val.lastIndexOf('\n', start - 1) + 1;
             let lineEnd = val.indexOf('\n', end);
             let effectiveEnd = lineEnd === -1 ? val.length : lineEnd + 1;
@@ -2394,7 +2477,7 @@ if (sandboxCodeEditor) {
                 sandboxCodeEditor.value = val.substring(0, lineStart) + val.substring(effectiveEnd);
                 sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = lineStart;
             }
-            saveSandboxHistory();
+            saveSandboxHistory(true);
             updateSandboxHighlight();
             showEditorToast('تم حذف السطر [Ctrl + Shift + K]', 'fa-trash-can');
             return;
@@ -2509,23 +2592,24 @@ if (sandboxCodeEditor) {
 
         if (closeChars.includes(key) && start === end && val.charAt(start) === key) {
             e.preventDefault();
-            sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+            e.stopPropagation();
+            sandboxCodeEditor.setSelectionRange(start + 1, start + 1);
             return;
         }
 
         if (openPairs[key]) {
             e.preventDefault();
+            e.stopPropagation();
             const closeChar = openPairs[key];
             if (start !== end) {
                 const selectedText = val.substring(start, end);
                 sandboxCodeEditor.value = val.substring(0, start) + key + selectedText + closeChar + val.substring(end);
-                sandboxCodeEditor.selectionStart = start + 1;
-                sandboxCodeEditor.selectionEnd = end + 1;
+                sandboxCodeEditor.setSelectionRange(start + 1, end + 1);
             } else {
                 sandboxCodeEditor.value = val.substring(0, start) + key + closeChar + val.substring(end);
-                sandboxCodeEditor.selectionStart = sandboxCodeEditor.selectionEnd = start + 1;
+                sandboxCodeEditor.setSelectionRange(start + 1, start + 1);
             }
-            saveSandboxHistory();
+            saveSandboxHistory(true);
             updateSandboxHighlight();
             return;
         }
@@ -2534,6 +2618,9 @@ if (sandboxCodeEditor) {
     // الاستماع العام للاختصارات على مستوى النافذة (Global Window Listener) لتعمل الاختصارات من أي موضع
     window.addEventListener('keydown', (e) => {
         if (sandboxModal && sandboxModal.classList.contains('show')) {
+            // إذا كان التركيز داخل المحرر نفسه، نتركه يعالج الحدث لمنع التكرار المضاعف
+            if (e.target === sandboxCodeEditor) return;
+
             const isCtrlOrCmd = e.ctrlKey || e.metaKey;
             const key = e.key;
             const code = e.code;
@@ -2576,12 +2663,15 @@ if (sandboxCodeEditor) {
                 return;
             }
 
-            // تكرار السطر: Ctrl + D أو Shift + Alt + Down/Up
+            // تكرار السطر: Shift + Alt + Down/Up أو Alt + Shift + Down/Up أو Ctrl + D
             const isDuplicateKey = (code === 'KeyD' || key === 'd' || key === 'D' || key === 'ي');
-            const isAltShiftArrow = (e.altKey && e.shiftKey && (code === 'ArrowDown' || code === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowUp'));
-            if ((isCtrlOrCmd && isDuplicateKey) || isAltShiftArrow) {
+            const hasAltAndShift = (e.altKey && e.shiftKey);
+            const isDownArrow = (code === 'ArrowDown' || key === 'ArrowDown' || key === 'Down');
+            const isUpArrow = (code === 'ArrowUp' || key === 'ArrowUp' || key === 'Up');
+
+            if ((isCtrlOrCmd && isDuplicateKey) || (hasAltAndShift && (isDownArrow || isUpArrow))) {
                 e.preventDefault();
-                const isUp = (code === 'ArrowUp' || key === 'ArrowUp');
+                const isUp = isUpArrow;
                 duplicateSandboxLine(isUp);
                 return;
             }
@@ -2647,8 +2737,38 @@ function closeSandboxModal() {
 
 if (openSandboxHeroBtn) openSandboxHeroBtn.addEventListener('click', openSandboxModal);
 if (navSandboxLink) navSandboxLink.addEventListener('click', (e) => { e.preventDefault(); openSandboxModal(); });
+const headerCodeEditorBtn = document.getElementById('header-code-editor-btn');
+if (headerCodeEditorBtn) headerCodeEditorBtn.addEventListener('click', (e) => { e.preventDefault(); openSandboxModal(); });
+const mobileCodeBtn = document.getElementById('mobile-code-btn');
+if (mobileCodeBtn) mobileCodeBtn.addEventListener('click', (e) => { e.preventDefault(); openSandboxModal(); });
 if (closeSandboxModalBtn) closeSandboxModalBtn.addEventListener('click', closeSandboxModal);
 if (sandboxBackBtn) sandboxBackBtn.addEventListener('click', closeSandboxModal);
+
+// التحكم في تبويبات الهاتف لمحرر الأكواد والشاشة الطرفية
+const tabBtnEditor = document.getElementById('tab-btn-editor');
+const tabBtnOutput = document.getElementById('tab-btn-output');
+const sandboxEditorPanel = document.getElementById('sandbox-editor-panel');
+const sandboxOutputPanel = document.getElementById('sandbox-output-panel');
+
+function switchMobileTab(tabName) {
+    if (tabName === 'output') {
+        if (tabBtnOutput) tabBtnOutput.classList.add('active');
+        if (tabBtnEditor) tabBtnEditor.classList.remove('active');
+        if (sandboxOutputPanel) sandboxOutputPanel.classList.add('active-mobile-panel');
+        if (sandboxEditorPanel) sandboxEditorPanel.classList.remove('active-mobile-panel');
+    } else {
+        if (tabBtnEditor) tabBtnEditor.classList.add('active');
+        if (tabBtnOutput) tabBtnOutput.classList.remove('active');
+        if (sandboxEditorPanel) sandboxEditorPanel.classList.add('active-mobile-panel');
+        if (sandboxOutputPanel) sandboxOutputPanel.classList.remove('active-mobile-panel');
+        if (sandboxCodeEditor) {
+            sandboxCodeEditor.focus();
+        }
+    }
+}
+
+if (tabBtnEditor) tabBtnEditor.addEventListener('click', () => switchMobileTab('editor'));
+if (tabBtnOutput) tabBtnOutput.addEventListener('click', () => switchMobileTab('output'));
 
 // Initial highlight on load
 updateSandboxHighlight();
@@ -2699,6 +2819,10 @@ if (sandboxRunBtn && sandboxCodeEditor && sandboxTerminalOutput) {
         const code = sandboxCodeEditor.value || '';
         if (!code.trim()) return;
 
+        if (window.innerWidth <= 768 && typeof switchMobileTab === 'function') {
+            switchMobileTab('output');
+        }
+
         sandboxTerminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل الكود...</span>';
         if (sandboxExecTime) sandboxExecTime.classList.add('hidden');
 
@@ -2724,12 +2848,7 @@ if (sandboxRunBtn && sandboxCodeEditor && sandboxTerminalOutput) {
             window.Sk.configure({
                 output: outf,
                 read: builtinRead,
-                inputfun: (p) => {
-                    return new Promise((res) => {
-                        const v = window.prompt(p || 'أدخل قيمة input():');
-                        res(v || '');
-                    });
-                },
+                inputfun: (p) => promptTerminalInput(sandboxTerminalOutput, p),
                 inputfunTakesPrompt: true
             });
 

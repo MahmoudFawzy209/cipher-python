@@ -89,7 +89,7 @@ class CipherAdminHandler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), CipherAdminHandler) as httpd:
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    with socketserver.ThreadingTCPServer(("", PORT), CipherAdminHandler) as httpd:
         print(f"Cipher Python server running at http://localhost:{PORT}/")
         httpd.serve_forever()

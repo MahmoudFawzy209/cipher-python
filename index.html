@@ -9,9 +9,14 @@
     <meta name="keywords" content="تعلم بايثون, كورس بايثون بالعربي, شيفرة, برمجة بايثون للمبتدئين, Python tutorial Arabic, متغيرات بايثون, دالة input, الجمل الشرطية في بايثون, القوائم في بايثون, الحلقات التكرارية بايثون">
     <meta name="author" content="قناة شيفرة - Cipher Python">
     <meta name="robots" content="index, follow">
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2">
+    <link rel="shortcut icon" href="favicon.ico?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="canonical" href="https://shifra-python.com/">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=2">
     <meta name="theme-color" content="#08090d">
 
     <!-- Open Graph / Social Media / Google Ads Preview -->
@@ -438,20 +443,28 @@
     <!-- شريط التنقل (Navbar) -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">
-                <picture>
-                    <source srcset="logo.webp" type="image/webp">
-                    <img src="logo.png" alt="شيفرة" class="logo-img" width="48" height="48">
-                </picture>
-            </a>
+            <div class="nav-brand-group">
+                <a href="#" class="logo">
+                    <picture>
+                        <source srcset="logo.webp" type="image/webp">
+                        <img src="logo.png" alt="شيفرة" class="logo-img" width="48" height="48">
+                    </picture>
+                    <span class="logo-text">شيفرة</span>
+                </a>
+                <button type="button" id="header-code-editor-btn" class="header-editor-badge" title="فتح محرر بايثون التفاعلي">
+                    <i class="fa-solid fa-code"></i> <span>محرر بايثون</span>
+                </button>
+            </div>
             <ul class="nav-links">
                 <li><a href="#home" class="active">الرئيسية</a></li>
                 <li><a href="#lessons">الدروس والحلقات</a></li>
                 <li><a href="#sandbox" id="nav-sandbox-link" class="nav-sandbox-link"><i class="fa-solid fa-code"></i> محرر الأكواد</a></li>
             </ul>
-            <button id="theme-toggle" class="theme-btn" aria-label="تبديل المظهر">
-                <i class="fa-solid fa-sun"></i>
-            </button>
+            <div class="nav-extra-actions">
+                <button id="theme-toggle" class="theme-btn" aria-label="تبديل المظهر">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -462,6 +475,9 @@
                 <h1 class="bounce-in">تعلم لغة <span class="highlight">Python</span> من الصفر للاحتراف</h1>
                 <p class="fade-in">قناة <span class="hero-brand-inline"><i class="fa-brands fa-python"></i> شيفرة</span> قناة تعليمية عربية متخصصة في تبسيط علوم البرمجة وتعلم لغة بايثون - Python من الصفر وحتى الاحتراف بأسلوب عملي وتدريجي يناسب المبتدئين تماماً لتصبح مبرمج بايثون محترف.</p>
                 <div class="hero-buttons fade-in-up">
+                    <button type="button" id="open-sandbox-hero-btn" class="btn btn-sandbox-glow">
+                        <i class="fa-solid fa-laptop-code"></i> جرب محرر بايثون
+                    </button>
                     <a href="https://www.youtube.com/@Coding-w8y?sub_confirmation=1" target="_blank" rel="noopener" class="btn btn-primary">
                         <i class="fa-brands fa-youtube"></i> اشترك في القناة
                     </a>
@@ -628,9 +644,14 @@
                     <span id="close-sandbox-modal" class="close-modal" title="إغلاق">&times;</span>
                 </div>
             </div>
-            <div class="sandbox-grid">
+            <!-- تبويبات الهاتف للتبديل السريع بين الكود والمخرجات -->
+            <div class="mobile-editor-tabs" id="mobile-editor-tabs">
+                <button type="button" class="mobile-tab-btn active" id="tab-btn-editor" data-tab="editor"><i class="fa-solid fa-code"></i> كود بايثون (main.py)</button>
+                <button type="button" class="mobile-tab-btn" id="tab-btn-output" data-tab="output"><i class="fa-solid fa-terminal"></i> شاشة المخرجات (Terminal)</button>
+            </div>
+            <div class="sandbox-grid" id="sandbox-grid">
                 <!-- المربع الأول: كتابة وتعديل الكود بنمط VS Code الاحترافي -->
-                <div class="sandbox-panel sandbox-editor-panel">
+                <div class="sandbox-panel sandbox-editor-panel active-mobile-panel" id="sandbox-editor-panel">
                     <div class="panel-header">
                         <div class="panel-header-left">
                             <span><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</span>
@@ -689,7 +710,7 @@
                 </div>
 
                 <!-- المربع الثاني: شاشة مخرجات الكود -->
-                <div class="sandbox-panel sandbox-output-panel">
+                <div class="sandbox-panel sandbox-output-panel" id="sandbox-output-panel">
                     <div class="panel-header">
                         <span><i class="fa-solid fa-terminal"></i> مخرجات الكود (Terminal Output)</span>
                         <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
