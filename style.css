@@ -1157,7 +1157,8 @@ body.dark-theme .editor-header {
     direction: rtl; /* اتجاه قراءة العنوان من اليمين لليسار */
 }
 
-.panel-header-left {
+.panel-header-left,
+.panel-header-right {
     display: flex;
     align-items: center;
     gap: 8px;

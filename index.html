@@ -625,8 +625,7 @@
                     <button type="button" id="sandbox-back-btn" class="modal-back-home-btn" title="العودة للصفحة الرئيسية">
                         <i class="fa-solid fa-arrow-right"></i> العودة للصفحة الرئيسية
                     </button>
-                    <span class="sandbox-title"><i class="fa-solid fa-code"></i> محرر بايثون التفاعلي | Code Editor</span>
-                    <span id="sandbox-exec-time" class="exec-time-badge">⏱️ 0.02s</span>
+                    <span class="sandbox-title"><i class="fa-solid fa-code"></i> Python Code Editor</span>
                 </div>
                 <div class="sandbox-header-actions">
                     <button type="button" id="sandbox-run-btn" class="run-code-btn" title="تشغيل الكود">
@@ -638,35 +637,20 @@
                     <button type="button" id="sandbox-download-btn" class="terminal-btn" title="تحميل ملف بايثون">
                         <i class="fa-solid fa-download"></i> تحميل .py
                     </button>
-                    <button type="button" id="sandbox-clear-btn" class="terminal-btn" title="مسح الكود">
-                        <i class="fa-solid fa-eraser"></i> مسح
-                    </button>
                     <span id="close-sandbox-modal" class="close-modal" title="إغلاق">&times;</span>
                 </div>
             </div>
             <!-- تبويبات الهاتف للتبديل السريع بين الكود والمخرجات -->
             <div class="mobile-editor-tabs" id="mobile-editor-tabs">
-                <button type="button" class="mobile-tab-btn active" id="tab-btn-editor" data-tab="editor"><i class="fa-solid fa-code"></i> كود بايثون (main.py)</button>
-                <button type="button" class="mobile-tab-btn" id="tab-btn-output" data-tab="output"><i class="fa-solid fa-terminal"></i> شاشة المخرجات (Terminal)</button>
+                <button type="button" class="mobile-tab-btn active" id="tab-btn-editor" data-tab="editor"><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</button>
+                <button type="button" class="mobile-tab-btn" id="tab-btn-output" data-tab="output"><i class="fa-solid fa-terminal"></i> Output</button>
             </div>
             <div class="sandbox-grid" id="sandbox-grid">
-                <!-- المربع الأول: كتابة وتعديل الكود بنمط VS Code الاحترافي -->
+                <!-- المربع الأول: كتابة وتعديل الكود -->
                 <div class="sandbox-panel sandbox-editor-panel active-mobile-panel" id="sandbox-editor-panel">
                     <div class="panel-header">
-                        <div class="panel-header-left">
+                        <div class="panel-header-right">
                             <span><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</span>
-                            <span class="panel-hint">Python 3 (VS Code style)</span>
-                        </div>
-                        <div class="panel-header-tools">
-                            <button type="button" id="sandbox-undo-btn" class="editor-mini-btn" title="تراجع (Ctrl + Z)"><i class="fa-solid fa-rotate-left"></i></button>
-                            <button type="button" id="sandbox-redo-btn" class="editor-mini-btn" title="تقدم (Ctrl + Y)"><i class="fa-solid fa-rotate-right"></i></button>
-                            <button type="button" id="sandbox-comment-btn" class="editor-mini-btn" title="تهميش / إلغاء تهميش (Ctrl + /)"><i class="fa-solid fa-hashtag"></i> تهميش</button>
-                            <button type="button" id="sandbox-duplicate-btn" class="editor-mini-btn" title="تكرار السطر (Ctrl + D)"><i class="fa-regular fa-clone"></i> تكرار</button>
-                            <button type="button" id="sandbox-find-btn" class="editor-mini-btn" title="بحث واستبدال (Ctrl + F)"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
-                            <button type="button" id="sandbox-format-btn" class="editor-mini-btn" title="تنسيق الكود (Shift + Alt + F)"><i class="fa-solid fa-wand-magic-sparkles"></i> تنسيق</button>
-                            <button type="button" id="sandbox-shortcuts-btn" class="editor-mini-btn" title="دليل كل الاختصارات (F1)"><i class="fa-solid fa-keyboard"></i> الاختصارات</button>
-                            <button type="button" id="sandbox-font-minus" class="editor-mini-btn" title="تصغير حجم الخط"><i class="fa-solid fa-minus"></i> A</button>
-                            <button type="button" id="sandbox-font-plus" class="editor-mini-btn" title="تكبير حجم الخط"><i class="fa-solid fa-plus"></i> A</button>
                         </div>
                     </div>
                     <!-- شريط البحث والاستبدال المدمج (Find & Replace Bar) -->
@@ -712,7 +696,7 @@
                 <!-- المربع الثاني: شاشة مخرجات الكود -->
                 <div class="sandbox-panel sandbox-output-panel" id="sandbox-output-panel">
                     <div class="panel-header">
-                        <span><i class="fa-solid fa-terminal"></i> مخرجات الكود (Terminal Output)</span>
+                        <span><i class="fa-solid fa-terminal"></i> Output</span>
                         <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
                     </div>
                     <div id="sandbox-terminal-output" class="sandbox-output">Hello shifra_channel</div>
