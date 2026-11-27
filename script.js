@@ -1457,53 +1457,194 @@ const closeTerminalBtn = document.getElementById('close-terminal-btn');
 const runCodeOnlineBtn = document.getElementById('run-code-online-btn');
 const terminalExecTime = document.getElementById('terminal-exec-time');
 
-// محرك بايثون المستقل فائق السرعة عبر Web Worker لموقع شيفرة
+// ========================================================
+// محرك تشغيل بايثون الهجين لموقع شيفرة (WebAssembly + Skulpt Fallback)
+// ========================================================
 let shefraPyWorker = null;
+let skulptPromise = null;
+
+function loadSkulptDirect() {
+    if (window.Sk && window.Sk.builtinFiles) return Promise.resolve();
+    if (skulptPromise) return skulptPromise;
+
+    skulptPromise = new Promise((resolve, reject) => {
+        const loadScript = (src) => {
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = false;
+                s.onload = res;
+                s.onerror = rej;
+                document.head.appendChild(s);
+            });
+        };
+
+        loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js')
+            .then(() => loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js'))
+            .then(resolve)
+            .catch(reject);
+    });
+    return skulptPromise;
+}
+
+function runWithSkulpt(code, outputElement, execTimeElement) {
+    return loadSkulptDirect().then(() => {
+        outputElement.innerHTML = '';
+
+        const outf = (t) => {
+            outputElement.appendChild(document.createTextNode(t));
+            outputElement.scrollTop = outputElement.scrollHeight;
+        };
+
+        const builtinRead = (x) => {
+            if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined) {
+                throw "ملف غير موجود: '" + x + "'";
+            }
+            return window.Sk.builtinFiles["files"][x];
+        };
+
+        window.Sk.configure({
+            output: outf,
+            read: builtinRead,
+            inputfun: (p) => promptTerminalInput(outputElement, p),
+            inputfunTakesPrompt: true
+        });
+
+        const t0 = performance.now();
+        return window.Sk.misceval.asyncToPromise(() => {
+            return window.Sk.importMainWithBody("<stdin>", false, code, true);
+        }).then(() => {
+            const dur = ((performance.now() - t0) / 1000).toFixed(2);
+            if (execTimeElement) {
+                execTimeElement.innerHTML = `⏱️ ${dur}s`;
+                execTimeElement.classList.remove('hidden');
+            }
+            return true;
+        });
+    });
+}
 
 function getPyodideWorker() {
     if (!shefraPyWorker) {
-        shefraPyWorker = new Worker('pyodide-worker.js');
+        shefraPyWorker = new Worker('pyodide-worker.js?v=26');
     }
     return shefraPyWorker;
 }
 
-function runPythonInWorker(code, outputElement, execTimeElement, runButton, originalButtonHtml) {
+// دالة التشغيل الذكية: تجرب Pyodide فإن تعذر بسبب الشبكة تنتقل فوراً وبسلاسة إلى Skulpt
+function runPythonSmart(code, outputElement, execTimeElement, runButton, originalButtonHtml) {
     return new Promise((resolve) => {
-        const worker = getPyodideWorker();
-        if (outputElement) outputElement.innerHTML = '';
+        let hasFailed = false;
+        let workerFinished = false;
+
+        if (outputElement) outputElement.innerHTML = '<span class="term-info">⚡ جاري تشغيل الكود...</span>';
         if (execTimeElement) execTimeElement.classList.add('hidden');
 
-        const handleMsg = (e) => {
-            const { type, text, success, executionTime } = e.data;
-            if (type === 'stdout' && outputElement) {
-                outputElement.appendChild(document.createTextNode(text));
-                outputElement.scrollTop = outputElement.scrollHeight;
-            } else if (type === 'stderr' && outputElement) {
-                const errSpan = document.createElement('span');
-                errSpan.className = 'term-error';
-                errSpan.textContent = text;
-                outputElement.appendChild(errSpan);
-                outputElement.scrollTop = outputElement.scrollHeight;
-            } else if (type === 'finished') {
-                worker.removeEventListener('message', handleMsg);
-                if (execTimeElement && executionTime) {
-                    execTimeElement.innerHTML = `⏱️ ${executionTime}`;
-                    execTimeElement.classList.remove('hidden');
+        // مهلة 4 ثوانٍ إذا علق التحميل الأولي لـ WebAssembly بسبب اتصال الإنترنت
+        const fallbackTimer = setTimeout(() => {
+            if (!workerFinished) {
+                hasFailed = true;
+                if (shefraPyWorker) {
+                    shefraPyWorker.terminate();
+                    shefraPyWorker = null;
                 }
-                if (runButton && originalButtonHtml) {
-                    runButton.innerHTML = originalButtonHtml;
-                }
-                resolve(success);
+                runWithSkulpt(code, outputElement, execTimeElement)
+                    .then(resolve)
+                    .catch((err) => {
+                        outputElement.innerHTML = `<span class="term-error">❌ ${err.toString()}</span>`;
+                        resolve(false);
+                    })
+                    .finally(() => {
+                        if (runButton && originalButtonHtml) runButton.innerHTML = originalButtonHtml;
+                    });
             }
-        };
+        }, 4000);
 
-        worker.addEventListener('message', handleMsg);
-        worker.postMessage({ type: 'run', code, id: Date.now() });
+        try {
+            const worker = getPyodideWorker();
+            let accumulatedError = '';
+
+            const handleMsg = (e) => {
+                if (hasFailed) return;
+                const { type, text, success, executionTime } = e.data;
+
+                if (type === 'stdout' && outputElement) {
+                    if (outputElement.innerHTML.includes('جاري تشغيل الكود')) {
+                        outputElement.innerHTML = '';
+                    }
+                    outputElement.appendChild(document.createTextNode(text));
+                    outputElement.scrollTop = outputElement.scrollHeight;
+                } else if (type === 'stderr') {
+                    accumulatedError += text;
+                    // إذا كان الخطأ متعلقاً بملفات النظام (init_fs_encoding أو exit(1))
+                    if (text.includes('Fatal Python error') || text.includes('init_fs_encoding') || text.includes('exit(1)')) {
+                        clearTimeout(fallbackTimer);
+                        hasFailed = true;
+                        workerFinished = true;
+                        worker.removeEventListener('message', handleMsg);
+                        if (shefraPyWorker) {
+                            shefraPyWorker.terminate();
+                            shefraPyWorker = null;
+                        }
+                        // الانتقال الفوري لمحرك Skulpt
+                        runWithSkulpt(code, outputElement, execTimeElement)
+                            .then(resolve)
+                            .catch((err) => {
+                                outputElement.innerHTML = `<span class="term-error">❌ ${err.toString()}</span>`;
+                                resolve(false);
+                            })
+                            .finally(() => {
+                                if (runButton && originalButtonHtml) runButton.innerHTML = originalButtonHtml;
+                            });
+                        return;
+                    }
+                    if (outputElement) {
+                        const errSpan = document.createElement('span');
+                        errSpan.className = 'term-error';
+                        errSpan.textContent = text;
+                        outputElement.appendChild(errSpan);
+                        outputElement.scrollTop = outputElement.scrollHeight;
+                    }
+                } else if (type === 'finished') {
+                    clearTimeout(fallbackTimer);
+                    workerFinished = true;
+                    worker.removeEventListener('message', handleMsg);
+
+                    if (!success && (accumulatedError.includes('Fatal') || accumulatedError.includes('exit(1)'))) {
+                        runWithSkulpt(code, outputElement, execTimeElement)
+                            .then(resolve)
+                            .finally(() => {
+                                if (runButton && originalButtonHtml) runButton.innerHTML = originalButtonHtml;
+                            });
+                        return;
+                    }
+
+                    if (execTimeElement && executionTime) {
+                        execTimeElement.innerHTML = `⏱️ ${executionTime}`;
+                        execTimeElement.classList.remove('hidden');
+                    }
+                    if (runButton && originalButtonHtml) {
+                        runButton.innerHTML = originalButtonHtml;
+                    }
+                    resolve(success);
+                }
+            };
+
+            worker.addEventListener('message', handleMsg);
+            worker.postMessage({ type: 'run', code, id: Date.now() });
+        } catch (workerErr) {
+            clearTimeout(fallbackTimer);
+            runWithSkulpt(code, outputElement, execTimeElement)
+                .then(resolve)
+                .finally(() => {
+                    if (runButton && originalButtonHtml) runButton.innerHTML = originalButtonHtml;
+                });
+        }
     });
 }
 
 function ensureSkulptLoaded() {
-    getPyodideWorker();
+    loadSkulptDirect().catch(() => {});
     return Promise.resolve();
 }
 
@@ -1645,7 +1786,7 @@ if (runCodeOnlineBtn) {
         runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التنفيذ...';
 
         try {
-            await runPythonInWorker(codeToRun, terminalOutput, terminalExecTime, runCodeOnlineBtn, btnOrigHtml);
+            await runPythonSmart(codeToRun, terminalOutput, terminalExecTime, runCodeOnlineBtn, btnOrigHtml);
             if (typeof window.trackCampaignEvent === 'function') {
                 window.trackCampaignEvent('run_python_code', { lesson_id: currentLessonId });
             }
@@ -2898,7 +3039,7 @@ if (sandboxRunBtn && sandboxCodeEditor && sandboxTerminalOutput) {
         sandboxRunBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التشغيل...';
 
         try {
-            await runPythonInWorker(code, sandboxTerminalOutput, sandboxExecTime, sandboxRunBtn, origHtml);
+            await runPythonSmart(code, sandboxTerminalOutput, sandboxExecTime, sandboxRunBtn, origHtml);
         } catch (err) {
             const errSpan = document.createElement('span');
             errSpan.className = 'term-error';
