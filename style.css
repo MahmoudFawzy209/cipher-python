@@ -1303,6 +1303,46 @@ body.dark-theme .editor-header {
     direction: ltr !important;
 }
 
+/* تنسيقات محرر CodeMirror الاحترافي لموقع شيفرة */
+.sandbox-editor-container .CodeMirror {
+    height: 100% !important;
+    width: 100% !important;
+    background: #1e1e1e !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    font-size: var(--editor-font-size, 15px) !important;
+    line-height: var(--editor-line-height, 24px) !important;
+    direction: ltr !important;
+}
+
+.sandbox-editor-container .CodeMirror-gutters {
+    background: #181a1f !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+    white-space: nowrap !important;
+}
+
+.sandbox-editor-container .CodeMirror-linenumber {
+    color: #64748b !important;
+    padding: 0 10px 0 6px !important;
+    font-size: 14px !important;
+}
+
+.sandbox-editor-container .CodeMirror-cursor {
+    border-left: 2px solid #38bdf8 !important;
+}
+
+.sandbox-editor-container .CodeMirror-activeline-background {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.sandbox-editor-container.has-codemirror .sandbox-line-numbers,
+.sandbox-editor-container.has-codemirror .sandbox-pre {
+    display: none !important;
+}
+
+.sandbox-editor-container.has-codemirror .sandbox-editor-wrapper {
+    width: 100% !important;
+}
+
 /* عمود أرقام الأسطر التلقائي الاحترافي */
 .sandbox-line-numbers {
     width: 44px;

@@ -1457,50 +1457,61 @@ const closeTerminalBtn = document.getElementById('close-terminal-btn');
 const runCodeOnlineBtn = document.getElementById('run-code-online-btn');
 const terminalExecTime = document.getElementById('terminal-exec-time');
 
-let isSkulptLoading = false;
-let skulptLoadPromise = null;
+// محرك بايثون المستقل فائق السرعة عبر Web Worker لموقع شيفرة
+let shefraPyWorker = null;
 
-function ensureSkulptLoaded() {
-    if (window.Sk && window.Sk.builtinFiles) return Promise.resolve();
-    if (skulptLoadPromise) return skulptLoadPromise;
-
-    isSkulptLoading = true;
-    skulptLoadPromise = new Promise((resolve, reject) => {
-        const loadScript = (src) => {
-            return new Promise((res, rej) => {
-                const s = document.createElement('script');
-                s.src = src;
-                s.async = false;
-                s.onload = res;
-                s.onerror = rej;
-                document.head.appendChild(s);
-            });
-        };
-
-        loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js')
-            .then(() => loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js'))
-            .then(() => {
-                isSkulptLoading = false;
-                resolve();
-            })
-            .catch((err) => {
-                isSkulptLoading = false;
-                skulptLoadPromise = null;
-                reject(err);
-            });
-    });
-    return skulptLoadPromise;
+function getPyodideWorker() {
+    if (!shefraPyWorker) {
+        shefraPyWorker = new Worker('pyodide-worker.js');
+    }
+    return shefraPyWorker;
 }
 
-// تحميل هادئ بعد اكتمال تحميل الموقع بـ 3 ثوانٍ أثناء خمول المتصفح
+function runPythonInWorker(code, outputElement, execTimeElement, runButton, originalButtonHtml) {
+    return new Promise((resolve) => {
+        const worker = getPyodideWorker();
+        if (outputElement) outputElement.innerHTML = '';
+        if (execTimeElement) execTimeElement.classList.add('hidden');
+
+        const handleMsg = (e) => {
+            const { type, text, success, executionTime } = e.data;
+            if (type === 'stdout' && outputElement) {
+                outputElement.appendChild(document.createTextNode(text));
+                outputElement.scrollTop = outputElement.scrollHeight;
+            } else if (type === 'stderr' && outputElement) {
+                const errSpan = document.createElement('span');
+                errSpan.className = 'term-error';
+                errSpan.textContent = text;
+                outputElement.appendChild(errSpan);
+                outputElement.scrollTop = outputElement.scrollHeight;
+            } else if (type === 'finished') {
+                worker.removeEventListener('message', handleMsg);
+                if (execTimeElement && executionTime) {
+                    execTimeElement.innerHTML = `⏱️ ${executionTime}`;
+                    execTimeElement.classList.remove('hidden');
+                }
+                if (runButton && originalButtonHtml) {
+                    runButton.innerHTML = originalButtonHtml;
+                }
+                resolve(success);
+            }
+        };
+
+        worker.addEventListener('message', handleMsg);
+        worker.postMessage({ type: 'run', code, id: Date.now() });
+    });
+}
+
+function ensureSkulptLoaded() {
+    getPyodideWorker();
+    return Promise.resolve();
+}
+
+// تحميل هادئ بعد اكتمال تحميل الموقع بـ 2 ثانية
 window.addEventListener('load', () => {
     setTimeout(() => {
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => ensureSkulptLoaded().catch(() => {}));
-        } else {
-            ensureSkulptLoaded().catch(() => {});
-        }
-    }, 3000);
+        getPyodideWorker();
+    }, 2000);
 });
 
 // ميزة سحب شاشة مخرجات بايثون للأعلى والأسفل بحرية تامة
@@ -1626,7 +1637,7 @@ if (runCodeOnlineBtn) {
 
         if (codeTerminal) codeTerminal.classList.remove('hidden');
         if (terminalOutput) {
-            terminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل كود بايثون...</span>';
+            terminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل كود بايثون عبر WebAssembly...</span>';
         }
         if (terminalExecTime) terminalExecTime.classList.add('hidden');
 
@@ -1634,42 +1645,7 @@ if (runCodeOnlineBtn) {
         runCodeOnlineBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التنفيذ...';
 
         try {
-            await ensureSkulptLoaded();
-
-            if (!terminalOutput) return;
-            terminalOutput.innerHTML = '';
-
-            const outf = (text) => {
-                terminalOutput.appendChild(document.createTextNode(text));
-                terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            };
-
-            const builtinRead = (x) => {
-                if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined) {
-                    throw "ملف غير موجود: '" + x + "'";
-                }
-                return window.Sk.builtinFiles["files"][x];
-            };
-
-            window.Sk.configure({
-                output: outf,
-                read: builtinRead,
-                inputfun: (promptText) => promptTerminalInput(terminalOutput, promptText),
-                inputfunTakesPrompt: true
-            });
-
-            const startTime = performance.now();
-            await window.Sk.misceval.asyncToPromise(() => {
-                return window.Sk.importMainWithBody("<stdin>", false, codeToRun, true);
-            });
-            const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-
-            // عرض وقت التنفيذ بأناقة في شريط الأدوات بدلاً من تشويه المخرجات
-            if (terminalExecTime) {
-                terminalExecTime.innerHTML = `⏱️ ${duration}s`;
-                terminalExecTime.classList.remove('hidden');
-            }
-
+            await runPythonInWorker(codeToRun, terminalOutput, terminalExecTime, runCodeOnlineBtn, btnOrigHtml);
             if (typeof window.trackCampaignEvent === 'function') {
                 window.trackCampaignEvent('run_python_code', { lesson_id: currentLessonId });
             }
@@ -1899,6 +1875,21 @@ function goToLine(lineNum) {
 
 // تحديث مؤشرات السطر والعمود والإحصائيات
 function updateCursorStatus() {
+    if (window.sandboxCM) {
+        const cursor = window.sandboxCM.getCursor();
+        const lineNum = cursor.line + 1;
+        const colNum = cursor.ch + 1;
+        const totalLines = window.sandboxCM.lineCount();
+        const val = window.sandboxCM.getValue();
+        if (sandboxCursorPos) {
+            sandboxCursorPos.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> سطر ${lineNum}، عمود ${colNum}`;
+        }
+        if (sandboxDocStats) {
+            sandboxDocStats.textContent = `${totalLines} أسطر | ${val.length} حرف`;
+        }
+        return;
+    }
+
     if (!sandboxCodeEditor) return;
     const val = sandboxCodeEditor.value || '';
     const pos = sandboxCodeEditor.selectionStart || 0;
@@ -1916,6 +1907,11 @@ function updateCursorStatus() {
 }
 
 function updateSandboxHighlight() {
+    if (window.sandboxCM) {
+        window.sandboxCM.refresh();
+        updateCursorStatus();
+        return;
+    }
     if (!sandboxCodeEditor || !sandboxHighlightedCode) return;
     let code = sandboxCodeEditor.value || '';
     if (code.endsWith('\n')) code += ' ';
@@ -1941,6 +1937,15 @@ function setEditorFontSize(size) {
     const sizePx = currentEditorFontSize + 'px';
     const linePx = Math.round(currentEditorFontSize * 1.6) + 'px';
     
+    if (window.sandboxCM) {
+        const wrapper = window.sandboxCM.getWrapperElement();
+        if (wrapper) {
+            wrapper.style.setProperty('font-size', sizePx, 'important');
+            wrapper.style.setProperty('line-height', linePx, 'important');
+            window.sandboxCM.refresh();
+        }
+    }
+
     const editorPanel = document.querySelector('.sandbox-editor-panel');
     if (editorPanel) {
         editorPanel.style.setProperty('--editor-font-size', sizePx);
@@ -2712,19 +2717,76 @@ if (sandboxCodeEditor) {
     });
 }
 
+// تهيئة محرر CodeMirror الاحترافي لموقع شيفرة
+let sandboxCM = null;
+
+function initSandboxCodeMirror() {
+    if (sandboxCM || !window.CodeMirror) return;
+    const textarea = document.getElementById('sandbox-code-editor');
+    const container = document.querySelector('.sandbox-editor-container');
+    if (!textarea || !container) return;
+
+    container.classList.add('has-codemirror');
+
+    sandboxCM = CodeMirror.fromTextArea(textarea, {
+        mode: 'python',
+        theme: 'material-darker',
+        lineNumbers: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: false,
+        extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-Enter": () => {
+                if (sandboxRunBtn) sandboxRunBtn.click();
+            },
+            "Cmd-Enter": () => {
+                if (sandboxRunBtn) sandboxRunBtn.click();
+            },
+            "Tab": (cm) => {
+                if (cm.somethingSelected()) {
+                    cm.indentSelection("add");
+                } else {
+                    cm.replaceSelection("    ", "end");
+                }
+            }
+        }
+    });
+
+    window.sandboxCM = sandboxCM;
+    sandboxCM.setSize("100%", "100%");
+
+    sandboxCM.on('change', () => {
+        sandboxCM.save();
+        updateCursorStatus();
+        if (typeof runPythonDiagnostics === 'function') runPythonDiagnostics();
+    });
+
+    sandboxCM.on('cursorActivity', () => {
+        updateCursorStatus();
+    });
+}
+
 function openSandboxModal() {
     if (sandboxModal) {
         sandboxModal.classList.add('show');
         document.body.style.overflow = 'hidden';
         ensureSkulptLoaded().catch(() => {});
+        initSandboxCodeMirror();
         updateSandboxHighlight();
-        // تركيز فوري على مربع الكود لتكون اختصارات الكيبورد جاهزة للاستقبال في نفس اللحظة
+        
         setTimeout(() => {
-            if (sandboxCodeEditor) {
+            if (sandboxCM) {
+                sandboxCM.refresh();
+                sandboxCM.focus();
+            } else if (sandboxCodeEditor) {
                 sandboxCodeEditor.focus();
-                updateCursorStatus();
             }
-        }, 50);
+            updateCursorStatus();
+        }, 70);
     }
 }
 
@@ -2761,7 +2823,10 @@ function switchMobileTab(tabName) {
         if (tabBtnOutput) tabBtnOutput.classList.remove('active');
         if (sandboxEditorPanel) sandboxEditorPanel.classList.add('active-mobile-panel');
         if (sandboxOutputPanel) sandboxOutputPanel.classList.remove('active-mobile-panel');
-        if (sandboxCodeEditor) {
+        if (sandboxCM) {
+            sandboxCM.refresh();
+            sandboxCM.focus();
+        } else if (sandboxCodeEditor) {
             sandboxCodeEditor.focus();
         }
     }
@@ -2773,9 +2838,6 @@ if (tabBtnOutput) tabBtnOutput.addEventListener('click', () => switchMobileTab('
 // Initial highlight on load
 updateSandboxHighlight();
 
-// Keep modal open even when clicking outside the modal box
-// (Exit is ONLY allowed by clicking the Back to Home button or the X close icon)
-
 if (clearSandboxOutputBtn && sandboxTerminalOutput) {
     clearSandboxOutputBtn.addEventListener('click', () => {
         sandboxTerminalOutput.innerHTML = '<span class="term-placeholder">تم مسح المخرجات. اضغط على تشغيل الكود للبدء من جديد...</span>';
@@ -2785,15 +2847,20 @@ if (clearSandboxOutputBtn && sandboxTerminalOutput) {
 
 if (sandboxClearBtn && sandboxCodeEditor) {
     sandboxClearBtn.addEventListener('click', () => {
-        sandboxCodeEditor.value = '';
+        if (sandboxCM) {
+            sandboxCM.setValue('');
+            sandboxCM.focus();
+        } else {
+            sandboxCodeEditor.value = '';
+        }
         updateSandboxHighlight();
-        sandboxCodeEditor.focus();
     });
 }
 
 if (sandboxCopyBtn && sandboxCodeEditor) {
     sandboxCopyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(sandboxCodeEditor.value).then(() => {
+        const code = sandboxCM ? sandboxCM.getValue() : (sandboxCodeEditor.value || '');
+        navigator.clipboard.writeText(code).then(() => {
             const orig = sandboxCopyBtn.innerHTML;
             sandboxCopyBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ!';
             setTimeout(() => sandboxCopyBtn.innerHTML = orig, 2000);
@@ -2803,7 +2870,8 @@ if (sandboxCopyBtn && sandboxCodeEditor) {
 
 if (sandboxDownloadBtn && sandboxCodeEditor) {
     sandboxDownloadBtn.addEventListener('click', () => {
-        const blob = new Blob([sandboxCodeEditor.value], { type: 'text/plain;charset=utf-8' });
+        const code = sandboxCM ? sandboxCM.getValue() : (sandboxCodeEditor.value || '');
+        const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'main.py';
@@ -2816,52 +2884,21 @@ if (sandboxDownloadBtn && sandboxCodeEditor) {
 // تشغيل الكود في مختبر بايثون
 if (sandboxRunBtn && sandboxCodeEditor && sandboxTerminalOutput) {
     sandboxRunBtn.addEventListener('click', async () => {
-        const code = sandboxCodeEditor.value || '';
+        const code = sandboxCM ? sandboxCM.getValue() : (sandboxCodeEditor.value || '');
         if (!code.trim()) return;
 
         if (window.innerWidth <= 768 && typeof switchMobileTab === 'function') {
             switchMobileTab('output');
         }
 
-        sandboxTerminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل الكود...</span>';
+        sandboxTerminalOutput.innerHTML = '<span class="term-info">⚡ جاري تشغيل الكود عبر محرك بايثون...</span>';
         if (sandboxExecTime) sandboxExecTime.classList.add('hidden');
 
         const origHtml = sandboxRunBtn.innerHTML;
         sandboxRunBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التشغيل...';
 
         try {
-            await ensureSkulptLoaded();
-            sandboxTerminalOutput.innerHTML = '';
-
-            const outf = (t) => {
-                sandboxTerminalOutput.appendChild(document.createTextNode(t));
-                sandboxTerminalOutput.scrollTop = sandboxTerminalOutput.scrollHeight;
-            };
-
-            const builtinRead = (x) => {
-                if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined) {
-                    throw "ملف غير موجود: '" + x + "'";
-                }
-                return window.Sk.builtinFiles["files"][x];
-            };
-
-            window.Sk.configure({
-                output: outf,
-                read: builtinRead,
-                inputfun: (p) => promptTerminalInput(sandboxTerminalOutput, p),
-                inputfunTakesPrompt: true
-            });
-
-            const t0 = performance.now();
-            await window.Sk.misceval.asyncToPromise(() => {
-                return window.Sk.importMainWithBody("<stdin>", false, code, true);
-            });
-            const dur = ((performance.now() - t0) / 1000).toFixed(2);
-
-            if (sandboxExecTime) {
-                sandboxExecTime.innerHTML = `⏱️ ${dur}s`;
-                sandboxExecTime.classList.remove('hidden');
-            }
+            await runPythonInWorker(code, sandboxTerminalOutput, sandboxExecTime, sandboxRunBtn, origHtml);
         } catch (err) {
             const errSpan = document.createElement('span');
             errSpan.className = 'term-error';
