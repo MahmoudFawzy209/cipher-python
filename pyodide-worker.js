@@ -1,5 +1,6 @@
 // pyodide-worker.js - مشغل بايثون WebAssembly لموقع شيفرة
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js");
+const PYODIDE_CDN_BASE = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
+importScripts(PYODIDE_CDN_BASE + "pyodide.js");
 
 let pyodide = null;
 let isReady = false;
@@ -11,7 +12,10 @@ function initPyodide() {
   pyodidePromise = (async () => {
     try {
       self.postMessage({ type: "status", status: "loading", message: "جاري تحميل محرك بايثون..." });
+      
+      // تعيين indexURL صراحة إلى CDN يضمن تحميل كافة ملفات zip و wasm الصحيحة
       pyodide = await loadPyodide({
+        indexURL: PYODIDE_CDN_BASE,
         stdout: (text) => {
           self.postMessage({ type: "stdout", text: text + "\n" });
         },
@@ -24,7 +28,9 @@ function initPyodide() {
       self.postMessage({ type: "status", status: "ready", message: "محرك بايثون جاهز للتشغيل الفوري." });
       return pyodide;
     } catch (error) {
-      self.postMessage({ type: "status", status: "error", message: "فشل تحميل محرك بايثون: " + error.message });
+      const errDetail = error ? (error.message || error.stack || error.toString()) : "خطأ غير معروف";
+      self.postMessage({ type: "status", status: "error", message: "فشل تحميل محرك بايثون: " + errDetail });
+      self.postMessage({ type: "stderr", text: "❌ خطأ في تحميل بيئة بايثون: " + errDetail + "\n" });
       pyodidePromise = null;
       throw error;
     }
@@ -58,9 +64,10 @@ self.onmessage = async (event) => {
         executionTime: `${executionTime}s` 
       });
     } catch (err) {
+      const errMsg = err ? (err.message || err.toString()) : "خطأ أثناء تنفيذ الكود";
       self.postMessage({ 
         type: "stderr", 
-        text: `❌ ${err.toString()}\n` 
+        text: `❌ ${errMsg}\n` 
       });
       self.postMessage({ 
         type: "finished", 

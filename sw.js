@@ -1,11 +1,11 @@
-const CACHE_NAME = 'shefra-v24';
+const CACHE_NAME = 'shefra-v25';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
-  '/style.css?v=24',
+  '/style.css?v=25',
   '/script.js',
-  '/script.js?v=24',
+  '/script.js?v=25',
   '/pyodide-worker.js',
   '/logo.png',
   '/logo.webp',
@@ -38,8 +38,14 @@ self.addEventListener('activate', (e) => {
 // True Network-First for HTML navigation so updates appear immediately!
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  
-  if (e.request.url.includes('youtube.com') || e.request.url.includes('api.github.com')) {
+
+  // استثناء ملفات Pyodide و CDN واليوتيوب من تدخل الـ Cache
+  if (
+    e.request.url.includes('youtube.com') || 
+    e.request.url.includes('api.github.com') ||
+    e.request.url.includes('jsdelivr.net') ||
+    e.request.url.includes('pyodide')
+  ) {
     return;
   }
 
