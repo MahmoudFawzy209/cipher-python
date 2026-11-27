@@ -683,7 +683,10 @@
                 <div class="sandbox-panel sandbox-output-panel" id="sandbox-output-panel">
                     <div class="panel-header">
                         <span><i class="fa-solid fa-terminal"></i> Output</span>
-                        <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="sandbox-exec-time" class="exec-time-badge hidden"></span>
+                            <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
+                        </div>
                     </div>
                     <div id="sandbox-terminal-output" class="sandbox-output">Hello shifra_channel</div>
                 </div>
