@@ -439,7 +439,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
     <!-- ملف التنسيقات الخاص بنا -->
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=27">
 </head>
 
 <body class="dark-theme">
@@ -589,7 +589,6 @@
                             <div class="terminal-header">
                                 <span class="terminal-title"><i class="fa-solid fa-terminal"></i> مخرجات الكود (Python Output)</span>
                                 <div class="terminal-actions">
-                                    <span id="terminal-exec-time" class="exec-time-badge hidden"></span>
                                     <button type="button" id="clear-terminal-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
                                     <button type="button" id="close-terminal-btn" class="terminal-btn" title="إغلاق الشاشة"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
@@ -640,10 +639,10 @@
                     <span id="close-sandbox-modal" class="close-modal" title="إغلاق">&times;</span>
                 </div>
             </div>
-            <!-- تبويبات الهاتف للتبديل السريع بين الكود والمخرجات -->
-            <div class="mobile-editor-tabs" id="mobile-editor-tabs">
-                <button type="button" class="mobile-tab-btn active" id="tab-btn-editor" data-tab="editor"><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</button>
+            <!-- تبويبات الهاتف للتبديل السريع بين الكود والمخرجات (Output على اليمين) -->
+            <div class="mobile-editor-tabs" id="mobile-editor-tabs" dir="rtl">
                 <button type="button" class="mobile-tab-btn" id="tab-btn-output" data-tab="output"><i class="fa-solid fa-terminal"></i> Output</button>
+                <button type="button" class="mobile-tab-btn active" id="tab-btn-editor" data-tab="editor"><i class="fa-brands fa-python" style="color: #38bdf8;"></i> main.py</button>
             </div>
             <div class="sandbox-grid" id="sandbox-grid">
                 <!-- المربع الأول: كتابة وتعديل الكود -->
@@ -679,12 +678,11 @@
                     </div>
                 </div>
 
-                <!-- المربع الثاني: شاشة مخرجات الكود -->
+                <!-- المربع الثاني: شاشة مخرجات الكود (على اليمين) -->
                 <div class="sandbox-panel sandbox-output-panel" id="sandbox-output-panel">
                     <div class="panel-header">
                         <span><i class="fa-solid fa-terminal"></i> Output</span>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span id="sandbox-exec-time" class="exec-time-badge hidden"></span>
                             <button type="button" id="clear-sandbox-output-btn" class="terminal-btn" title="مسح المخرجات"><i class="fa-solid fa-trash-can"></i> مسح</button>
                         </div>
                     </div>
@@ -844,7 +842,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/python-hint.min.js"></script>
     <!-- ملف الجافاسكربت الخاص بنا -->
-    <script defer src="script.js?v=26"></script>
+    <script defer src="script.js?v=27"></script>
     <!-- تسجيل وتحديث الـ Service Worker للتحميل اللحظي والتحديث الفوري -->
     <script>
         if ('serviceWorker' in navigator) {

@@ -988,17 +988,7 @@ body.dark-theme .editor-header {
 }
 
 .exec-time-badge {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.4);
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-family: 'Fira Code', monospace;
-    font-weight: 600;
-    padding: 2px 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    display: none !important;
 }
 
 .exec-time-badge.hidden {
@@ -2032,8 +2022,14 @@ body.admin-mode .admin-infographic-bar {
         display: inline-flex;
     }
 
+    /* إخفاء زر تحميل ملف بايثون على واجهة الموبايل فقط */
+    #sandbox-download-btn {
+        display: none !important;
+    }
+
     .mobile-editor-tabs {
         display: flex !important;
+        direction: rtl !important;
         background: #0d121f;
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 10px;
