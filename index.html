@@ -439,7 +439,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
     <!-- ملف التنسيقات الخاص بنا -->
-    <link rel="stylesheet" href="style.css?v=27">
+    <link rel="stylesheet" href="style.css?v=28">
 </head>
 
 <body class="dark-theme">
@@ -621,12 +621,12 @@
         <div class="modal-content sandbox-modal-content">
             <div class="modal-top-bar">
                 <div class="sandbox-header-info">
-                    <button type="button" id="sandbox-back-btn" class="modal-back-home-btn" title="العودة للصفحة الرئيسية">
-                        <i class="fa-solid fa-arrow-right"></i> العودة للصفحة الرئيسية
+                    <button type="button" id="sandbox-back-btn" class="modal-back-home-btn" title="العودة">
+                        <i class="fa-solid fa-arrow-right"></i> العودة
                     </button>
                     <span class="sandbox-title"><i class="fa-solid fa-code"></i> Python Code Editor</span>
                 </div>
-                <div class="sandbox-header-actions">
+                <div class="sandbox-header-actions" dir="ltr">
                     <button type="button" id="sandbox-run-btn" class="run-code-btn" title="تشغيل الكود">
                         <i class="fa-solid fa-play"></i> تشغيل الكود
                     </button>
@@ -636,7 +636,6 @@
                     <button type="button" id="sandbox-download-btn" class="terminal-btn" title="تحميل ملف بايثون">
                         <i class="fa-solid fa-download"></i> تحميل .py
                     </button>
-                    <span id="close-sandbox-modal" class="close-modal" title="إغلاق">&times;</span>
                 </div>
             </div>
             <!-- تبويبات الهاتف للتبديل السريع بين الكود والمخرجات (Output على اليمين) -->
@@ -842,7 +841,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/python-hint.min.js"></script>
     <!-- ملف الجافاسكربت الخاص بنا -->
-    <script defer src="script.js?v=27"></script>
+    <script defer src="script.js?v=28"></script>
     <!-- تسجيل وتحديث الـ Service Worker للتحميل اللحظي والتحديث الفوري -->
     <script>
         if ('serviceWorker' in navigator) {

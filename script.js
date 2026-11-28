@@ -2787,6 +2787,41 @@ function initSandboxCodeMirror() {
     window.sandboxCM = sandboxCM;
     sandboxCM.setSize("100%", "100%");
 
+    // الإغلاق التلقائي للأقواس وعلامات التنصيص على الموبايل والكمبيوتر
+    const bracketPairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
+    sandboxCM.on('beforeChange', (cm, change) => {
+        if (change.origin === '+input' && change.text && change.text.length === 1) {
+            const entered = change.text[0];
+            if (bracketPairs[entered]) {
+                const closing = bracketPairs[entered];
+                const from = change.from;
+                const nextChar = cm.getRange(from, { line: from.line, ch: from.ch + 1 });
+                if (entered === closing && nextChar === closing) {
+                    change.cancel();
+                    cm.setCursor({ line: from.line, ch: from.ch + 1 });
+                    return;
+                }
+                change.text = [entered + closing];
+                setTimeout(() => {
+                    cm.setCursor({ line: from.line, ch: from.ch + entered.length });
+                }, 0);
+            }
+        }
+    });
+
+    // وضع مؤشر الكتابة بدقة بلمسة اليد في المكان المحدد كأنه مؤشر الفأرة
+    const cmWrapper = sandboxCM.getWrapperElement();
+    cmWrapper.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length === 1) {
+            const touch = e.touches[0];
+            const pos = sandboxCM.coordsChar({ left: touch.clientX, top: touch.clientY }, "window");
+            if (pos) {
+                sandboxCM.setCursor(pos);
+                sandboxCM.focus();
+            }
+        }
+    }, { passive: true });
+
     sandboxCM.on('change', () => {
         sandboxCM.save();
         updateCursorStatus();

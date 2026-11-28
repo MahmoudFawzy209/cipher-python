@@ -1,11 +1,11 @@
-const CACHE_NAME = 'shefra-v27';
+const CACHE_NAME = 'shefra-v28';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
-  '/style.css?v=27',
+  '/style.css?v=28',
   '/script.js',
-  '/script.js?v=27',
+  '/script.js?v=28',
   '/logo.png',
   '/logo.webp',
   '/manifest.json'
